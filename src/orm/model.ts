@@ -76,7 +76,7 @@ class Media extends Model {
                     comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
                 },
                 videoduration: {
-                    type: DataTypes.INTEGER.UNSIGNED,
+                    type: DataTypes.FLOAT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频时长'
                 },
@@ -125,7 +125,54 @@ class Media extends Model {
 }
 
 
+class MediaTs extends Model {
+    declare id: number
+    declare createdAt: Date
+    declare updatedAt: Date
+
+    declare mediaId: number
+    declare filePath: string
+    declare mediaUri: string
+    declare mediaInf: number
+    declare fileSize: number
+    declare status: number 
+
+    public static initial(sequelize: Sequelize) {
+        this.init(
+            {
+                mediaId: {
+                    type: DataTypes.INTEGER.UNSIGNED, 
+                },
+                filePath: {
+                    type: DataTypes.STRING, 
+                }, 
+                fileSize: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                    defaultValue: 0,
+                },
+                mediaInf:{
+                    type:DataTypes.FLOAT.UNSIGNED,
+                },
+                mediaUri: {
+                    type: DataTypes.STRING(255),
+                    allowNull: true
+                },
+                status: {
+                    type: DataTypes.TINYINT.UNSIGNED,
+                    defaultValue: 0,
+                    comment: '0 未处理'
+                },
+            },
+            {
+                sequelize,
+                underscored: true
+            }
+        )
+    }
+}
+
 export {
     AdminUser,
-    Media
+    Media,
+    MediaTs
 }
