@@ -2,7 +2,7 @@ import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import config from '#config/index.js'
 import { ismkdir } from '../util/index.js'
-import { writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { Media } from '../orm/model.js'
 
 const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri)
@@ -15,16 +15,17 @@ const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri)
 //     "key":"123456789"
 // }
 ffmpegQueue.process(async (job, done) => {
-
-    // 创建文件夹
+    // 前置操作
     await ismkdir(job.data.output)
+    const keyfile = (job.data.output as string).replace("index.m3u8","index.key") 
+
     const transcoding = ffmpeg(job.data.input)
     transcoding.outputOptions([
         "-hls_list_size 0",//展示所有的m3u8
         "-hls_time 15",//分段时长
         "-hls_enc 1",
         `-hls_enc_key ${job.data.key}`,
-        "-hls_enc_key_url index.key"
+        `-hls_enc_key_url ${keyfile}`
     ])
     transcoding.on('start', (commandLine) => {
         job.log('开始转码：转码命令' + commandLine)
@@ -37,9 +38,10 @@ ffmpegQueue.process(async (job, done) => {
     transcoding.on('progress', async (progress) => {
         job.progress(progress.percent)
     })
-    transcoding.on('end', (stdout, stderr) => {
-        const keyfile = (job.data.output as string).replace("index.m3u8","index.key") 
-        writeFileSync(keyfile,job.data.key)
+    transcoding.on('end', async(stdout, stderr) => {
+        const hlscontent = readFileSync(job.data.output,{encoding:'utf-8'})
+        const newHlsContent = hlscontent.replace(keyfile,"index.key")
+        writeFileSync(job.data.output,newHlsContent)
         Media.update({ status: 2 }, { where: { hlspath: job.data.output } })
         job.log("转码完成")
         done()
