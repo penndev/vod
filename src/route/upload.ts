@@ -9,16 +9,20 @@ export const uploadPart = async(ctx: Router.RouterContext)=>{
     // 当前分片编号1开始，总分片数量，上传ID, 上传数据
     const { currentPart,countPart,uploadID } = ctx.request.body
     const  uploadData  = ctx.request.files?.uploadData
+    
     if (typeof uploadData !== "object"){
+        ctx.status = 400
+        ctx.body = {message:"未上传文件"}
         return
     }
-
     const data = await Media.findByPk(uploadID)
-    if(typeof data?.filename !== "string" ){
+    if(data === null ){
+        ctx.status = 400
+        ctx.body = {message:"未选择数据"}
         return
     }
 
-    const filepath = `data/${data.id}/${data.filename}`
+    const filepath = `data/${data.id}/${data.fileName}`
     const reader = readFileSync((uploadData as File).filepath)
     await ismkdir(filepath)
     writeFileSync(filepath,reader,{flag:"a+"})
@@ -26,7 +30,7 @@ export const uploadPart = async(ctx: Router.RouterContext)=>{
     // 判断是否是最后一次上传。修改文件状态。
     if(currentPart === countPart){
         // 查验文件信息
-        data.filepath = filepath
+        data.filePath = filepath
         data.save()
         ffprobeQueue.add(data)
     }
@@ -39,8 +43,8 @@ export const uploadPart = async(ctx: Router.RouterContext)=>{
 export const uploadBefore = async(ctx: Router.RouterContext) => {
     const { name, md5 } = ctx.request.body
     const data = await Media.create({
-        filename: name,
-        filemd5: md5,
+        fileName: name,
+        fileMd5: md5,
     })
     // 如果数据存在，则开始指定的切片。计数从1开始
     ctx.body = {

@@ -21,7 +21,7 @@ router.put("/upload/part", uploadPart)
 // 后台运行的队列任务
 router.get('/job/hls/query', taskHlsQuery)
 router.post('/job/hls/submit', taskHlsSubmit)
-router.get('/job/mpegts/query', taskMpegtsSubmit )
-router.post('/job/mpegts/submit', taskMpegtsQuery )
+router.get('/job/mpegts/query', taskMpegtsQuery)
+router.post('/job/mpegts/submit', taskMpegtsSubmit)
 
 export default router

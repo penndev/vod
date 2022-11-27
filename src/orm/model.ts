@@ -34,39 +34,36 @@ class Media extends Model {
     declare createdAt: Date;
     declare updatedAt: Date;
 
-    declare filename: string
-    declare filepath: string
-    declare filemd5: string
-    declare filesize: number
+    declare fileName: string
+    declare filePath: string
+    declare fileMd5: string
+    declare fileSize: number
 
+    declare videoDuration: number
+    declare videoFps: number
+    declare videoBitrate: number
+    declare videoWidth: number
+    declare videoHeight: number
 
-
-    declare videoduration: number
-    declare videofps: number
-    declare videobitrate: number
-    declare videowidth: number
-    declare videoheight: number
-
-    declare hlspath: string
-    declare hlssize: number
-    declare hlskey: string
+    declare hlsPath: string
+    declare hlsKey: string
 
     public static initial(sequelize: Sequelize) {
         this.init(
             {
-                filename: {
+                fileName: {
                     type: DataTypes.STRING,
                     allowNull: false,
                 },
-                filepath: {
+                filePath: {
                     type: DataTypes.STRING,
                     allowNull: true
                 },
-                filemd5: {
+                fileMd5: {
                     type: DataTypes.CHAR(32),
                     allowNull: true
                 },
-                filesize: {
+                fileSize: {
                     type: DataTypes.INTEGER.UNSIGNED,
                     defaultValue: 0,
                 },
@@ -75,42 +72,37 @@ class Media extends Model {
                     defaultValue: 0,
                     comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
                 },
-                videoduration: {
+                videoDuration: {
                     type: DataTypes.FLOAT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频时长'
                 },
-                videofps: {
+                videoFps: {
                     type: DataTypes.TINYINT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频帧率'
                 },
-                videobitrate: {
+                videoBitrate: {
                     type: DataTypes.MEDIUMINT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频比特率'
                 },
-                videowidth: {
+                videoWidth: {
                     type: DataTypes.SMALLINT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频宽度'
                 },
-                videoheight: {
+                videoHeight: {
                     type: DataTypes.SMALLINT.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频高度'
                 },
-                hlspath: {
+                hlsPath: {
                     type: DataTypes.STRING,
                     allowNull: true,
                     comment: 'm3u8 path'
                 },
-                hlssize: {
-                    type: DataTypes.INTEGER.UNSIGNED,
-                    allowNull: true,
-                    comment: 'm3u8 file size'
-                },
-                hlskey: {
+                hlsKey: {
                     type: DataTypes.CHAR(16),
                     allowNull: true,
                     comment: 'hls aes key'

@@ -7,21 +7,22 @@ import { randomstr } from "#util/index.js"
 // 提交转码任务
 // @param query id (媒体文件id)
 export const taskHlsSubmit = async(ctx:Router.RouterContext) => {
-    const id = Number(ctx.request.query.id)
+    const id = Number(ctx.request.body.id)
     const data = await Media.findByPk(id)
     if (data == null){
         return
     }
-    data.hlspath = `data/${data.id}/hls/index.m3u8`
-    data.hlskey = randomstr(16)
+    data.hlsPath = `data/${data.id}/hls/index.m3u8`
+    data.hlsKey = randomstr(16)
     data.save()
     const queue = await ffmpegQueue.add({
-        input: data.filepath,
-        output: data.hlspath,
-        key: data.hlskey, 
+        input: data.filePath,
+        output: data.hlsPath,
+        key: data.hlsKey, 
     })
     ctx.body = {
-        jobId: queue.id
+        jobId: queue.id,
+        message: `转码任务为-> ${queue.id}`
     }
 }
 

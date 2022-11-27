@@ -1,10 +1,22 @@
-import { access, mkdirSync, constants } from "fs";
-import { parse } from "path";
-import SparkMD5 from "spark-md5"
-// const sparkmd5 = new SparkMD5()
+import { access, mkdirSync, constants, createReadStream } from 'fs'
+import { parse } from 'path'
+import crypto from 'crypto'
 
 export const md5 = (d: string) => {
-    return SparkMD5.hash(d)
+    return crypto.createHash('md5').update(d, 'utf8').digest('hex') 
+}
+
+export const md5laragefile = (p :string) => {
+    return new Promise<string>((resolve, reject) => {
+        const md5sum = crypto.createHash('md5')
+        const filestream = createReadStream(p)
+        filestream.on('data',(dataChunk)=>{
+            md5sum.update(dataChunk)
+        })
+        filestream.on('end', () => {
+            resolve(md5sum.digest('hex'))
+        })
+    })
 }
 
 export const sleep = (ms: number) => {
