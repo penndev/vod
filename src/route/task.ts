@@ -15,11 +15,7 @@ export const taskHlsSubmit = async(ctx:Router.RouterContext) => {
     data.hlsPath = `data/${data.id}/hls/index.m3u8`
     data.hlsKey = randomstr(16)
     data.save()
-    const queue = await ffmpegQueue.add({
-        input: data.filePath,
-        output: data.hlsPath,
-        key: data.hlsKey, 
-    })
+    const queue = await ffmpegQueue.add(data)
     ctx.body = {
         jobId: queue.id,
         message: `转码任务为-> ${queue.id}`

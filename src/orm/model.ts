@@ -39,6 +39,8 @@ class Media extends Model {
     declare fileMd5: string
     declare fileSize: number
 
+    declare status: number
+
     declare videoDuration: number
     declare videoFps: number
     declare videoBitrate: number
@@ -123,36 +125,41 @@ class MediaTs extends Model {
     declare updatedAt: Date
 
     declare mediaId: number
-    declare filePath: string
-    declare mediaUri: string
-    declare mediaInf: number
-    declare fileSize: number
-    declare status: number 
-
+    declare status: number
+    
+    declare tsPath: string
+    declare tsSize: number
+    declare tsSeq: number
+    declare tsExtinf: number
+    declare uploadUri: string
+    
     public static initial(sequelize: Sequelize) {
         this.init(
             {
                 mediaId: {
                     type: DataTypes.INTEGER.UNSIGNED, 
                 },
-                filePath: {
-                    type: DataTypes.STRING, 
-                }, 
-                fileSize: {
-                    type: DataTypes.INTEGER.UNSIGNED,
-                    defaultValue: 0,
-                },
-                mediaInf:{
-                    type:DataTypes.FLOAT.UNSIGNED,
-                },
-                mediaUri: {
-                    type: DataTypes.STRING(255),
-                    allowNull: true
-                },
                 status: {
                     type: DataTypes.TINYINT.UNSIGNED,
                     defaultValue: 0,
                     comment: '0 未处理'
+                },
+                tsPath: {
+                    type: DataTypes.STRING, 
+                },
+                tsSize: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                    defaultValue: 0,
+                }, 
+                tsSeq: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                }, 
+                tsExtinf:{
+                    type:DataTypes.FLOAT.UNSIGNED,
+                },
+                uploadUri: {
+                    type: DataTypes.STRING,
+                    allowNull: true
                 },
             },
             {

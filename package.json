@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "set NODE_ENV=dev&& nodemon -e ts,tsx --exec ts-node-esm src/index.ts",
+    "dev": "set NODE_ENV=dev&& nodemon --watch src -e ts,js --exec \"ts-node-esm src/index.ts\"",
     "serve": "ts-node-esm src/index.ts",
     "queue": "set NODE_ENV=queue&& ts-node-esm src/queue/index.ts"
   },
