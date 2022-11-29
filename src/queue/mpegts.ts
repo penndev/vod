@@ -5,7 +5,7 @@ import { createReadStream, statSync } from 'fs'
 import { createInterface } from 'readline'
 import { dirname, join } from 'path'
 
-const MpegtsQueue = new Queue('Mpegts analyze', config.rdsuri)
+const mpegtsQueue = new Queue('Mpegts analyze', config.rdsuri)
 
 // @param jobData  Media 实例json
 const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
@@ -34,6 +34,8 @@ const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
     done()
 }
 
-MpegtsQueue.process(callBack)
+if (process.env.NODE_ENV == "queue") {
+    mpegtsQueue.process(callBack)
+}
 
-MpegtsQueue.add({id:1,hlsPath:'data/1/hls/index.m3u8'})
+export default mpegtsQueue

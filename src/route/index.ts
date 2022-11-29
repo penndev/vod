@@ -1,22 +1,24 @@
 import Router from "@koa/router"
-import { captcha, login } from "./adminuser.js"
-import { mediaList } from "./media.js"
+import { auth } from "../middle/index.js"
+import { captcha, login } from "./admin.js"
+import { mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
-import { uploadBefore, uploadPart } from "./upload.js"
 
 const router = new Router({
     prefix: '/api'
 })
 
+// 管理员处理
 router.get('/captcha', captcha)
 router.post('/login', login)
 
-// 处理文件列表
-router.get('/media/list', mediaList)
+router.use(auth)//登录中间件
 
-// 分片上传媒体文件
-router.post('/upload/before', uploadBefore)
-router.put("/upload/part", uploadPart)
+// 媒体文件处理
+router.get('/media/list', mediaList)
+router.get('/media/mpegts/list', mediaMpegtsList)
+router.post('/media/upload/before', mediaUploadBefore) // 分片上传媒体文件
+router.put("/media/upload/part", mediaUploadPart)
 
 // 后台运行的队列任务
 router.get('/job/hls/query', taskHlsQuery)
