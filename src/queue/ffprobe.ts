@@ -45,6 +45,7 @@ const callBack:Queue.ProcessCallbackFunction<any> = async (job, done) => {
 }
 
 if ( ["queue","dev"].includes(process.env.NODE_ENV as string)){
+    console.log('bull (ffprobeQueue) started')
     ffprobeQueue.process(callBack)
 }
 
