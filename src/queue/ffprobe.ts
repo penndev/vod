@@ -44,7 +44,7 @@ const callBack:Queue.ProcessCallbackFunction<any> = async (job, done) => {
     })
 }
 
-if (process.env.NODE_ENV == "queue") {
+if ( ["queue","dev"].includes(process.env.NODE_ENV as string)){
     ffprobeQueue.process(callBack)
 }
 

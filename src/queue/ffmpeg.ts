@@ -44,7 +44,7 @@ const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
     transcoding.save(jobData.hlsPath)
 }
 
-if(process.env.NODE_ENV == 'queue'){
+if ( ["queue","dev"].includes(process.env.NODE_ENV as string)){
     ffmpegQueue.process(callBack)
 }
 
