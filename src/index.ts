@@ -26,5 +26,7 @@ app.use(serverAdapter.registerPlugin())
 // 请求路由
 app.use(route.routes())
 
-app.listen(config.port)
-console.log('\x1b[36m%s\x1b[0m', 'open in browser http://127.0.0.1:' + config.port)
+
+app.listen(config.port, config.host)
+
+console.log('\x1b[36m open in browser http://%s:%s \x1b[0m', config.host, config.port)
