@@ -1,7 +1,7 @@
 import Router from "@koa/router"
-import { ffmpegQueue, mpegtsQueue } from "#queue/index.js"
-import { Media } from "#orm/model.js"
-import { randomstr } from "#util/index.js"
+import { ffmpegQueue, mpegtsQueue } from "../queue/index.js"
+import { Media } from "../orm/model.js"
+import { randomstr } from "../util/index.js"
 
 
 // 提交转码任务

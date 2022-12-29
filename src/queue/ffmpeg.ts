@@ -1,9 +1,9 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import { readFileSync, writeFileSync } from 'fs'
-import config from '#config/index.js'
-import { ismkdir } from '#util/index.js'
-import { Media } from '#orm/index.js'
+import config from '../config/index.js'
+import { ismkdir } from '../util/index.js'
+import { Media } from '../orm/index.js'
 
 const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri)
 

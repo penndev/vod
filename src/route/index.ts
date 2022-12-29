@@ -12,7 +12,7 @@ const router = new Router({
 router.get('/captcha', captcha)
 router.post('/login', login)
 
-router.use(auth)//登录中间件
+router.use(auth) //登录中间件
 
 // 媒体文件处理
 router.get('/media/list', mediaList)

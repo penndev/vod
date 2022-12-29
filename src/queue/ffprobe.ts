@@ -1,8 +1,8 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
-import config from '#config/index.js'
-import { Media } from '#orm/index.js'
-import { md5laragefile } from '#util/index.js'
+import config from '../config/index.js'
+import { Media } from '../orm/index.js'
+import { md5laragefile } from '../util/index.js'
 
 const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri)
 

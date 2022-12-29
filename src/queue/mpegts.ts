@@ -1,6 +1,6 @@
 import Queue from 'bull'
-import config from '#config/index.js'
-import { Media, MediaTs } from '#orm/index.js'
+import config from '../config/index.js'
+import { Media, MediaTs } from '../orm/index.js'
 import { createReadStream, statSync } from 'fs'
 import { createInterface } from 'readline'
 import { dirname, join } from 'path'

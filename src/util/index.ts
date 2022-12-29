@@ -47,9 +47,5 @@ export const randomstr = (length: number) => {
 export const networks = (host: string) => {
     const netInterface = Object.values(os$3.networkInterfaces())
     const netFlatMap = netInterface.flatMap((nInterface) => nInterface ?? [])
-    const netWorks = netFlatMap.filter((detail) => detail && detail.address && detail.family == 'IPv4')
-    return networks
-    // for(let item of netWorks){
-    // console.log('\x1b[36m open in browser http://%s:%s \x1b[0m', item.address, config.port)
-    // }
+    return netFlatMap.filter((detail) => detail && detail.address && detail.family == 'IPv4')
 }

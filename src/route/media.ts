@@ -1,9 +1,9 @@
 import Router from "@koa/router"
-import { Media, MediaTs } from "#orm/model.js"
+import { Media, MediaTs } from "../orm/model.js"
 import { File } from 'formidable'
 import { readFileSync, writeFileSync } from "fs"
-import ffprobeQueue from "#queue/ffprobe.js"
-import { ismkdir } from "#util/index.js"
+import ffprobeQueue from "../queue/ffprobe.js"
+import { ismkdir } from "../util/index.js"
 
 export const mediaUploadPart = async(ctx: Router.RouterContext)=>{
     // 当前分片编号1开始，总分片数量，上传ID, 上传数据
@@ -54,6 +54,7 @@ export const mediaUploadBefore = async(ctx: Router.RouterContext) => {
 }
 
 export const mediaList = async (ctx: Router.RouterContext) => {
+    console.log(ctx.state)
     const page = Number(ctx.request.query.page)
     const limit = Number(ctx.request.query.limit) 
     const { rows, count } = await Media.findAndCountAll({
