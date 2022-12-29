@@ -17,9 +17,9 @@ Media.initial( sequelize )
 MediaTs.initial( sequelize )
 
 // 创建表
-// if(process.env.NODE_ENV == "dev"){
-//     await sequelize.sync({ alter: true })
-// }
+if(process.env.NODE_ENV == "dev"){
+    await sequelize.sync({ alter: true })
+}
 
 export {
     AdminUser,

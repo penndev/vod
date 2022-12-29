@@ -4,9 +4,10 @@ class AdminUser extends Model {
     declare id: number
     declare createdAt: Date;
     declare updatedAt: Date;
-
+    declare nickname: string
     declare email: string
     declare passwd: string
+    declare status: number
 
     public static initial(sequelize: Sequelize) {
         this.init(
@@ -18,7 +19,16 @@ class AdminUser extends Model {
                 passwd: {
                     type: DataTypes.STRING,
                     allowNull: false
-                }
+                },
+                nickname: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                status: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                    defaultValue: 0,
+                    comment: '0禁止登录 | 1允许登录'
+                },
             },
             {
                 sequelize,
@@ -126,18 +136,18 @@ class MediaTs extends Model {
 
     declare mediaId: number
     declare status: number
-    
+
     declare tsPath: string
     declare tsSize: number
     declare tsSeq: number
     declare tsExtinf: number
     declare uploadUri: string
-    
+
     public static initial(sequelize: Sequelize) {
         this.init(
             {
                 mediaId: {
-                    type: DataTypes.INTEGER.UNSIGNED, 
+                    type: DataTypes.INTEGER.UNSIGNED,
                 },
                 status: {
                     type: DataTypes.TINYINT.UNSIGNED,
@@ -145,17 +155,17 @@ class MediaTs extends Model {
                     comment: '0 未处理'
                 },
                 tsPath: {
-                    type: DataTypes.STRING, 
+                    type: DataTypes.STRING,
                 },
                 tsSize: {
                     type: DataTypes.INTEGER.UNSIGNED,
                     defaultValue: 0,
-                }, 
+                },
                 tsSeq: {
                     type: DataTypes.INTEGER.UNSIGNED,
-                }, 
-                tsExtinf:{
-                    type:DataTypes.FLOAT.UNSIGNED,
+                },
+                tsExtinf: {
+                    type: DataTypes.FLOAT.UNSIGNED,
                 },
                 uploadUri: {
                     type: DataTypes.STRING,

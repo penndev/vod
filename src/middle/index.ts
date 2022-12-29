@@ -2,6 +2,7 @@ import Router from '@koa/router'
 import { Next } from 'koa'
 import Jwt from 'jsonwebtoken'
 import config from '../config/index.js';
+import { AdminUser } from '../orm/model.js';
 
 export const responseTime = async (ctx: Router.RouterContext, next: Next) => {
     const start = Date.now();
@@ -32,7 +33,16 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     }
     try {
         const payload = Jwt.verify(token, config.secret)
-        ctx.state = payload.sub
+        const admininfo = await AdminUser.findByPk(Number(payload.sub))
+        if(admininfo === null){
+            ctx.status = 401, ctx.body = {'message':'用户失效'}
+            return
+        }
+        if(admininfo.status == 0){
+            ctx.status = 401, ctx.body = {'message':'用户状态错误'}
+            return
+        }
+        ctx.state = admininfo
         await next()
     } catch (error:any) {
         ctx.status = 401, ctx.body = {'message':'用户验证失败[' + error + ']'}
