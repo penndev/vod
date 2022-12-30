@@ -2,9 +2,10 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { AdminUser } from '../orm/index.js'
+import { AdminUser, Where } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
+import Bcrypt from 'bcrypt'
 
 /**
  * 获取系统验证码
@@ -30,7 +31,7 @@ export const captcha = async (ctx: Router.RouterContext) => {
  */
 export const login = async (ctx: Router.RouterContext) => {
     const { captchaID, captcha, username, password } = ctx.request.body
-    const text = await Redis.get(captchaID)
+    const text = await Redis.getDel(captchaID)
     if (text !== captcha) {
         ctx.status = 400, ctx.body = { message: '验证码错误' }
         return
@@ -50,7 +51,7 @@ export const login = async (ctx: Router.RouterContext) => {
             return
         }
     }
-    if (adminInfo.passwd != password) {
+    if (! await Bcrypt.compare(password,adminInfo.passwd)) {
         ctx.status = 400, ctx.body = { message: '密码错误' }
         return
     }
@@ -70,10 +71,19 @@ export const login = async (ctx: Router.RouterContext) => {
  */
 export const adminList = async (ctx:Router.RouterContext) => {
     const page = Number(ctx.request.query.page)
-    const limit = Number(ctx.request.query.limit) 
+    const limit = Number(ctx.request.query.limit)
+    
+    let whereArr: Where = {} 
+    const email = ctx.request.query.email
+    if(email !== undefined){
+        whereArr.email = {"$like": '%' + email + '%'} 
+    }
+
+    console.log(whereArr)
     const { rows, count } = await AdminUser.findAndCountAll({
         offset: page * limit - limit,
         limit: limit,
+        where: whereArr,
     })
     ctx.body = {
         data: rows,
@@ -109,9 +119,10 @@ export const adminCreate = async (ctx:Router.RouterContext) => {
         ctx.status = 400, ctx.body = {'message':'邮箱已存在！'}
         return
     }
+    const saltRound = await Bcrypt.genSalt(10)
     AdminUser.create({
         email: email,
-        passwd: passwd,
+        passwd: await Bcrypt.hash(passwd,saltRound),
         status: status,
         nickname: nickname,
     })

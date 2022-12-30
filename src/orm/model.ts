@@ -1,5 +1,6 @@
 import { Sequelize, DataTypes, Model } from 'sequelize'
 
+
 class AdminUser extends Model {
     declare id: number
     declare createdAt: Date;
@@ -183,5 +184,5 @@ class MediaTs extends Model {
 export {
     AdminUser,
     Media,
-    MediaTs
+    MediaTs,
 }

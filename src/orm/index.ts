@@ -1,6 +1,10 @@
-import { Sequelize } from 'sequelize'
+import { Sequelize,Op } from 'sequelize'
 import config from '../config/index.js'
 import { AdminUser, Media, MediaTs } from './model.js'
+
+interface Where {
+    [key: string]: any;
+}
 
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
@@ -8,6 +12,10 @@ const sequelize = new Sequelize(config.dburi,{
         dateStrings: true,
         typeCast: true
     },
+    operatorsAliases: {
+        $like: Op.like,
+        $not: Op.not
+    }
 })
 
 await sequelize.authenticate()
@@ -25,4 +33,5 @@ export {
     AdminUser,
     Media,
     MediaTs,
+    Where
 }
