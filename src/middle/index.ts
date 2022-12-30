@@ -8,10 +8,9 @@ export const responseTime = async (ctx: Router.RouterContext, next: Next) => {
     const start = Date.now();
     await next();
     const ms = Date.now() - start
+    ctx.set('X-Response-Time', `${ms}ms`);
     console.log('\x1b[32m%s\x1b[33m\t[%s]\x1b[32m[%sms]\x1b[0m -> \x1b[1;35m%s\x1b[0m', ctx.request.method, ctx.response.status, ms, ctx.request.URL)
-    //ctx.set('X-Response-Time', `${ms}ms`);
 }
-
 
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
     if (ctx.method !== 'OPTIONS') {
@@ -23,7 +22,6 @@ export const cors = async (ctx: Router.RouterContext, next: Next) => {
     ctx.set('Access-Control-Allow-Methods', '*')
     ctx.set('Access-Control-Allow-Headers', '*')
 }
-
 
 export const auth = async (ctx: Router.RouterContext, next: Next) => {
     const token = ctx.request.header['x-token'] 

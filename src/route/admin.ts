@@ -4,7 +4,7 @@ import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
 import { AdminUser } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
-import config from '../config/index.js'
+import Config from '../config/index.js'
 
 /**
  * 获取系统验证码
@@ -60,7 +60,7 @@ export const login = async (ctx: Router.RouterContext) => {
                 sub: adminInfo.id,
                 exp: Math.floor(Date.now()/1000) + 86400 * 7
             },
-            config.secret
+            Config.secret
         )
     }
 }
@@ -94,5 +94,42 @@ export const adminUpdate = async (ctx:Router.RouterContext) => {
     adminInfo.email = email, adminInfo.status = status, adminInfo.nickname = nickname
     adminInfo.save()
     ctx.state = 200, ctx.body = {'message':'操作完成'}
+    return
+}
+
+/**
+ * 新增管理员
+ */
+export const adminCreate = async (ctx:Router.RouterContext) => {
+    const {email, passwd, status, nickname } = ctx.request.body
+    const adminInfo = await AdminUser.findOne({
+        where:{email:email}
+    })
+    if (adminInfo !== null) {
+        ctx.status = 400, ctx.body = {'message':'邮箱已存在！'}
+        return
+    }
+    AdminUser.create({
+        email: email,
+        passwd: passwd,
+        status: status,
+        nickname: nickname,
+    })
+    ctx.status = 200, ctx.body = {'message':'创建成功！'}
+    return
+}
+
+/**
+ * 删除管理员
+ */
+export const adminDelete = async (ctx:Router.RouterContext) => {
+    const id = ctx.request.query.id
+    const adminInfo = await AdminUser.findByPk(Number(id))
+    if(adminInfo === null){
+        ctx.status = 400, ctx.body = {'message':'管理员不存在'}
+        return
+    }
+    adminInfo.destroy()
+    ctx.status = 200, ctx.body = {'message': adminInfo.email + '删除成功'}
     return
 }
