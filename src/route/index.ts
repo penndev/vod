@@ -1,29 +1,26 @@
 import Router from "@koa/router"
 import { auth } from "../middle/index.js"
-import { adminCreate, adminDelete, adminList, adminUpdate, captcha, login } from "./admin.js"
+import { accessLog, adminCreate, adminDelete, adminList, adminUpdate, captcha, login } from "./admin.js"
 import { mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
-const router = new Router({
-    prefix: '/api'
-})
+const router = new Router({ prefix: '/api' })
 
-/**
- * auth白名单
- */
-router.get('/captcha', captcha)
-router.post('/login', login)
+router.get('/captcha', captcha) // 全局验证码
+router.post('/login', login) // 管理员登录
 
 router.use(auth)
-
-/**
- * 系统管理员
- */
-router.get('/system/admin', adminList)
-router.put('/system/admin', adminUpdate)
-router.post('/system/admin', adminCreate)
-router.delete('/system/admin', adminDelete)
-
+{
+    /**
+     * /system/admin 系统管理员操作
+     * /system/admin/accesslog 管理员访问日志
+     */
+    router.get('/system/admin', adminList)
+    router.put('/system/admin', adminUpdate)
+    router.post('/system/admin', adminCreate)
+    router.delete('/system/admin', adminDelete)
+    router.get('/system/admin/accesslog', accessLog)
+}
 
 // 媒体文件处理
 router.get('/media/list', mediaList)

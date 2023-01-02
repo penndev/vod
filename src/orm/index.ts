@@ -1,26 +1,19 @@
-import { Sequelize,Op } from 'sequelize'
+import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
-import { AdminUser, Media, MediaTs } from './model.js'
-
-interface Where {
-    [key: string]: any;
-}
+import { AdminAccessLog, Admin, Media, MediaTs } from './model.js'
 
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
     dialectOptions: {
         dateStrings: true,
         typeCast: true
-    },
-    operatorsAliases: {
-        $like: Op.like,
-        $not: Op.not
     }
 })
 
 await sequelize.authenticate()
 
-AdminUser.initial( sequelize )
+Admin.initial( sequelize )
+AdminAccessLog.initial( sequelize )
 Media.initial( sequelize )
 MediaTs.initial( sequelize )
 
@@ -30,8 +23,8 @@ if(process.env.NODE_ENV == "dev"){
 }
 
 export {
-    AdminUser,
+    Admin,
+    AdminAccessLog,
     Media,
     MediaTs,
-    Where
 }

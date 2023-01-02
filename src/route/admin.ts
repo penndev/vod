@@ -2,10 +2,11 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { AdminUser, Where } from '../orm/index.js'
+import { Admin, AdminAccessLog } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
+import { Order, WhereOptions, Op } from 'sequelize'
 
 /**
  * 获取系统验证码
@@ -36,15 +37,18 @@ export const login = async (ctx: Router.RouterContext) => {
         ctx.status = 400, ctx.body = { message: '验证码错误' }
         return
     }
-    let adminInfo = await AdminUser.findOne({
+    let adminInfo = await Admin.findOne({
         where: { 'email': username }
     })
     if (adminInfo === null) {
-        const c = await AdminUser.count()
+        const c = await Admin.count()
         if (c < 1) {
-            adminInfo = await AdminUser.create({
-                'email': username,
-                'passwd': password,
+            const saltRound = await Bcrypt.genSalt(10)
+            adminInfo = await Admin.create({
+                email: username,
+                passwd: await Bcrypt.hash(password,saltRound),
+                status: 1,
+                nickname: 'admin',
             })
         } else {
             ctx.status = 400, ctx.body = { message: '用户不存在' }
@@ -73,14 +77,14 @@ export const adminList = async (ctx:Router.RouterContext) => {
     const page = Number(ctx.request.query.page)
     const limit = Number(ctx.request.query.limit)
     
-    let whereArr: Where = {} 
+    let whereArr: WhereOptions = {} 
     const email = ctx.request.query.email
     if(email !== undefined){
-        whereArr.email = {"$like": '%' + email + '%'} 
+        whereArr.email = {[Op.like]: '%' + email + '%'}
     }
 
     console.log(whereArr)
-    const { rows, count } = await AdminUser.findAndCountAll({
+    const { rows, count } = await Admin.findAndCountAll({
         offset: page * limit - limit,
         limit: limit,
         where: whereArr,
@@ -96,7 +100,7 @@ export const adminList = async (ctx:Router.RouterContext) => {
  */
 export const adminUpdate = async (ctx:Router.RouterContext) => {
     const {id, email, status, nickname } = ctx.request.body
-    const adminInfo = await AdminUser.findByPk(id)
+    const adminInfo = await Admin.findByPk(id)
     if(adminInfo === null){
         ctx.state = 400, ctx.body = {'message':'用户不存在！'}
         return
@@ -112,7 +116,7 @@ export const adminUpdate = async (ctx:Router.RouterContext) => {
  */
 export const adminCreate = async (ctx:Router.RouterContext) => {
     const {email, passwd, status, nickname } = ctx.request.body
-    const adminInfo = await AdminUser.findOne({
+    const adminInfo = await Admin.findOne({
         where:{email:email}
     })
     if (adminInfo !== null) {
@@ -120,7 +124,7 @@ export const adminCreate = async (ctx:Router.RouterContext) => {
         return
     }
     const saltRound = await Bcrypt.genSalt(10)
-    AdminUser.create({
+    Admin.create({
         email: email,
         passwd: await Bcrypt.hash(passwd,saltRound),
         status: status,
@@ -135,7 +139,7 @@ export const adminCreate = async (ctx:Router.RouterContext) => {
  */
 export const adminDelete = async (ctx:Router.RouterContext) => {
     const id = ctx.request.query.id
-    const adminInfo = await AdminUser.findByPk(Number(id))
+    const adminInfo = await Admin.findByPk(Number(id))
     if(adminInfo === null){
         ctx.status = 400, ctx.body = {'message':'管理员不存在'}
         return
@@ -143,4 +147,43 @@ export const adminDelete = async (ctx:Router.RouterContext) => {
     adminInfo.destroy()
     ctx.status = 200, ctx.body = {'message': adminInfo.email + '删除成功'}
     return
+}
+
+/**
+ * 管理员操作日志
+ */
+export const accessLog = async (ctx: Router.RouterContext) => {
+    const page = Number(ctx.request.query.page)
+    const limit = Number(ctx.request.query.limit)
+    const offset = (page || 1) * limit - limit
+    /**
+     * Where 条件
+     */
+    let where : WhereOptions = {}
+    const adminID = ctx.request.query.admin
+    if(adminID !== undefined){
+        where.admin = adminID
+    }
+    /**
+     * Order 条件
+     */
+    let order:Order = []
+    if (ctx.request.query.order !== undefined){
+        switch(ctx.request.query.order){
+            case '+id':
+                order = [['id','ASC']]
+                break
+            case '-id' :
+                order = [['id','DESC']] 
+                break
+        }
+    }
+
+    const { rows, count } = await AdminAccessLog.findAndCountAll({
+        offset, limit, where, order
+    })
+    ctx.body = {
+        data: rows,
+        total: count
+    }
 }

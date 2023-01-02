@@ -1,8 +1,8 @@
 import Router from '@koa/router'
 import { Next } from 'koa'
 import Jwt from 'jsonwebtoken'
-import config from '../config/index.js';
-import { AdminUser } from '../orm/model.js';
+import config from '../config/index.js'
+import { AdminAccessLog, Admin } from '../orm/model.js'
 
 export const responseTime = async (ctx: Router.RouterContext, next: Next) => {
     const start = Date.now();
@@ -29,21 +29,30 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         ctx.status = 401, ctx.body = {'message':'请进行用户验证'}
         return
     }
+    let adminInfo = null
     try {
         const payload = Jwt.verify(token, config.secret)
-        const admininfo = await AdminUser.findByPk(Number(payload.sub))
-        if(admininfo === null){
+        adminInfo = await Admin.findByPk(Number(payload.sub))
+        if(adminInfo === null){
             ctx.status = 401, ctx.body = {'message':'用户失效'}
             return
         }
-        if(admininfo.status == 0){
-            ctx.status = 401, ctx.body = {'message':'用户状态错误'}
+        if(adminInfo.status == 0){
+            ctx.status = 401, ctx.body = {'message':'用户禁止登录'}
             return
         }
-        ctx.state = admininfo
+        ctx.state = adminInfo
     } catch (error:any) {
         ctx.status = 401, ctx.body = {'message':'用户验证失败[' + error + ']'}
         return
     }
     await next()
+    AdminAccessLog.create({
+        admin: adminInfo.id,
+        path:ctx.request.URL.pathname,
+        method: ctx.request.method,
+        ip:ctx.request.ip,
+        payload: JSON.stringify(ctx.request.query) + JSON.stringify(ctx.request.body),
+        status: ctx.response.status
+    })
 }
