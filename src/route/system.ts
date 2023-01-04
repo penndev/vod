@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { Admin, AdminAccessLog } from '../orm/index.js'
+import { Admin, AdminAccessLog, Role } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
@@ -83,7 +83,6 @@ export const adminList = async (ctx:Router.RouterContext) => {
         whereArr.email = {[Op.like]: '%' + email + '%'}
     }
 
-    console.log(whereArr)
     const { rows, count } = await Admin.findAndCountAll({
         offset: page * limit - limit,
         limit: limit,
@@ -148,6 +147,94 @@ export const adminDelete = async (ctx:Router.RouterContext) => {
     ctx.status = 200, ctx.body = {'message': adminInfo.email + '删除成功'}
     return
 }
+
+
+/**
+ * 后台管理员列表
+ */
+export const roleList = async (ctx:Router.RouterContext) => {
+    const page = Number(ctx.request.query.page)
+    const limit = Number(ctx.request.query.limit)
+    
+    let whereArr: WhereOptions = {} 
+    const name = ctx.request.query.name
+    if(name !== undefined){
+        whereArr.name = {[Op.like]: '%' + name + '%'}
+    }
+
+    const { rows, count } = await Role.findAndCountAll({
+        offset: page * limit - limit,
+        limit: limit,
+        where: whereArr,
+    })
+    for(let i of rows){
+        i.route = JSON.parse(i.route)
+    }
+    ctx.body = {
+        data: rows,
+        total: count
+    }
+}
+
+/**
+ * 管理员更新
+ */
+export const roleUpdate = async (ctx:Router.RouterContext) => {
+    const { id, name, status, menu, route } = ctx.request.body
+    const roleInfo = await Role.findByPk(id)
+    if(roleInfo === null){
+        ctx.state = 400, ctx.body = {'message':'用户不存在！'}
+        return
+    }
+    roleInfo.name = name, 
+    roleInfo.status = status,
+    roleInfo.menu = menu, 
+    roleInfo.route = JSON.stringify(route),
+    roleInfo.save()
+    ctx.state = 200, ctx.body = {'message':'操作完成'}
+    return
+}
+
+/**
+ * 新增管理员
+ */
+export const roleCreate = async (ctx:Router.RouterContext) => {
+    const {name, status, menu, route } = ctx.request.body
+    const roleInfo = await Role.findOne({
+        where:{name}
+    })
+    if (roleInfo !== null) {
+        ctx.status = 400, ctx.body = {'message':'角色已存在！'}
+        return
+    }
+    const routeJson = JSON.stringify(route)
+    Role.create({
+        name,
+        status,
+        menu,
+        route: routeJson,
+    })
+    ctx.status = 200, ctx.body = {'message':'创建成功！'}
+    return
+}
+
+/**
+ * 删除管理员
+ */
+export const roleDelete = async (ctx:Router.RouterContext) => {
+    const id = ctx.request.query.id
+    const roleInfo = await Role.findByPk(Number(id))
+    if(roleInfo === null){
+        ctx.status = 400, ctx.body = {'message':'管理员不存在'}
+        return
+    }
+    roleInfo.destroy()
+    ctx.status = 200, ctx.body = {'message': roleInfo.name + '删除成功'}
+    return
+}
+
+
+
 
 /**
  * 管理员操作日志

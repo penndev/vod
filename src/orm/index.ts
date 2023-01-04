@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
-import { AdminAccessLog, Admin, Media, MediaTs } from './model.js'
+import { AdminAccessLog, Admin, Media, MediaTs, Role } from './model.js'
 
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
@@ -13,6 +13,7 @@ const sequelize = new Sequelize(config.dburi,{
 await sequelize.authenticate()
 
 Admin.initial( sequelize )
+Role.initial( sequelize )
 AdminAccessLog.initial( sequelize )
 Media.initial( sequelize )
 MediaTs.initial( sequelize )
@@ -24,6 +25,7 @@ if(process.env.NODE_ENV == "dev"){
 
 export {
     Admin,
+    Role,
     AdminAccessLog,
     Media,
     MediaTs,

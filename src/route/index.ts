@@ -1,6 +1,6 @@
 import Router from "@koa/router"
 import { auth } from "../middle/index.js"
-import { accessLog, adminCreate, adminDelete, adminList, adminUpdate, captcha, login } from "./admin.js"
+import { accessLog, adminCreate, adminDelete, adminList, adminUpdate, captcha, login, roleCreate, roleDelete, roleList, roleUpdate } from "./system.js"
 import { mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
@@ -11,14 +11,17 @@ router.post('/login', login) // 管理员登录
 
 router.use(auth)
 {
-    /**
-     * /system/admin 系统管理员操作
-     * /system/admin/accesslog 管理员访问日志
-     */
+    // 系统管理员操作
     router.get('/system/admin', adminList)
     router.put('/system/admin', adminUpdate)
     router.post('/system/admin', adminCreate)
     router.delete('/system/admin', adminDelete)
+    // 系统角色处理
+    router.get('/system/role', roleList)
+    router.put('/system/role', roleUpdate)
+    router.post('/system/role', roleCreate)
+    router.delete('/system/role', roleDelete)
+    // 管理员访问日志
     router.get('/system/admin/accesslog', accessLog)
 }
 

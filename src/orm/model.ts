@@ -41,6 +41,50 @@ class Admin extends Model {
     }
 }
 
+/**
+ * 角色列表
+ */
+class Role extends Model{
+    declare id: number
+    declare createdAt: Date;
+    declare updatedAt: Date;
+    declare name: string
+    declare status: number
+    declare menu: string
+    declare route: string
+
+    public static initial(sequelize: Sequelize) {
+        this.init(
+            {
+                name: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                status: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                    defaultValue: 0,
+                    comment: '0禁止登录 | 1允许登录'
+                },
+                menu: {
+                    type: DataTypes.STRING, 
+                    comment: '返回给前端展示的路由组 json[]'
+                },
+                route: {
+                    type: DataTypes.STRING,
+                    comment: '接口用户鉴权允许的路由组 json[]'
+                },
+            },
+            {
+                sequelize,
+                underscored: true
+            }
+        )
+    }
+}
+
+/**
+ * 权限访问日志
+ */
 class AdminAccessLog extends Model {
     declare id: number
     declare createdAt: Date;
@@ -230,6 +274,7 @@ class MediaTs extends Model {
 
 export {
     Admin,
+    Role,
     AdminAccessLog,
     Media,
     MediaTs,
