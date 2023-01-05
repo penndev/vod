@@ -7,6 +7,6 @@ const result2 = await Bcrypt.compare('123456,',hash)
 console.log(hash,result1,result2)
 
 
-let arr = new Map
+const arr = new Map
 arr.set('email','email@gmail.com')
 console.log(arr)

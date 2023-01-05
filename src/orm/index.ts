@@ -10,15 +10,17 @@ const sequelize = new Sequelize(config.dburi,{
     }
 })
 
+// 数据库链接
 await sequelize.authenticate()
 
-Admin.initial( sequelize )
-Role.initial( sequelize )
-AdminAccessLog.initial( sequelize )
-Media.initial( sequelize )
-MediaTs.initial( sequelize )
+// 表注册
+Admin.initial({sequelize, underscored: true })
+Role.initial({sequelize, underscored: true })
+AdminAccessLog.initial({sequelize, underscored: true })
+Media.initial({sequelize, underscored: true })
+MediaTs.initial({sequelize, underscored: true })
 
-// 创建表
+// 表结构同步
 if(process.env.NODE_ENV == "dev"){
     await sequelize.sync({ alter: true })
 }

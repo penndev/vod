@@ -8,9 +8,8 @@ import { Media } from '../orm/index.js'
 const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri)
 
 // @param job.data  Media 序列化json数据
-const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
+const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
     const jobData =  job.data as Media
-    
     await ismkdir(jobData.hlsPath)
     const keyfile = jobData.hlsPath.replace("index.m3u8", "index.key")
 
@@ -33,7 +32,7 @@ const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
     transcoding.on('progress', async (progress) => {
         job.progress(progress.percent)
     })
-    transcoding.on('end', async (stdout, stderr) => {
+    transcoding.on('end', async () => {
         const hlscontent = readFileSync(jobData.hlsPath, { encoding: 'utf-8' })
         const newHlsContent = hlscontent.replace(keyfile, "index.key")
         writeFileSync(jobData.hlsPath, newHlsContent)

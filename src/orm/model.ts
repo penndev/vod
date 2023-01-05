@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model } from 'sequelize'
+import { DataTypes, Model,InitOptions } from 'sequelize'
 
 /**
  * 管理员列表
@@ -10,9 +10,14 @@ class Admin extends Model {
     declare nickname: string
     declare email: string
     declare passwd: string
+    declare roleId: number
     declare status: number
 
-    public static initial(sequelize: Sequelize) {
+    // 实际不存在的对象
+    declare roleName : string
+    
+    // 结构体
+    static initial(options: InitOptions) {
         this.init(
             {
                 email: {
@@ -32,11 +37,28 @@ class Admin extends Model {
                     defaultValue: 0,
                     comment: '0禁止登录 | 1允许登录'
                 },
-            },
-            {
-                sequelize,
-                underscored: true
-            }
+                roleId: {
+                    type: DataTypes.INTEGER.UNSIGNED,
+                    allowNull: false,
+                    comment: '0超级管理员'
+                },
+                roleName: {
+                    type: DataTypes.VIRTUAL,
+                    get() {
+                        if(this.roleId == 0){
+                            return '超级管理员'
+                        }else{
+                            Role.findByPk(this.roleId).then(roleInfo => {
+                                if (roleInfo !== null){
+                                    return roleInfo.name
+                                }else{
+                                    return '权限错误'
+                                }
+                            })
+                        }
+                    },
+                }
+            },  options
         )
     }
 }
@@ -53,7 +75,7 @@ class Role extends Model{
     declare menu: string
     declare route: string
 
-    public static initial(sequelize: Sequelize) {
+    public static initial(options: InitOptions)  {
         this.init(
             {
                 name: {
@@ -74,10 +96,7 @@ class Role extends Model{
                     comment: '接口用户鉴权允许的路由组 json[]'
                 },
             },
-            {
-                sequelize,
-                underscored: true
-            }
+            options
         )
     }
 }
@@ -96,7 +115,7 @@ class AdminAccessLog extends Model {
     declare payload: string //requets param or body
     declare ip: string 
 
-    public static initial(sequelize: Sequelize) {
+    public static initial(options: InitOptions)  {
         this.init(
             {
                 admin: {
@@ -123,10 +142,7 @@ class AdminAccessLog extends Model {
                     comment:'http 响应状态码'
                 }
             },
-            {
-                sequelize,
-                underscored: true
-            }
+            options
         )
     }
 }
@@ -152,7 +168,7 @@ class Media extends Model {
     declare hlsPath: string
     declare hlsKey: string
 
-    public static initial(sequelize: Sequelize) {
+    public static initial(options: InitOptions) {
         this.init(
             {
                 fileName: {
@@ -212,10 +228,7 @@ class Media extends Model {
                     comment: 'hls aes key'
                 }
             },
-            {
-                sequelize,
-                underscored: true
-            }
+            options
         )
     }
 }
@@ -235,7 +248,7 @@ class MediaTs extends Model {
     declare tsExtinf: number
     declare uploadUri: string
 
-    public static initial(sequelize: Sequelize) {
+    public static initial(options: InitOptions) {
         this.init(
             {
                 mediaId: {
@@ -264,10 +277,7 @@ class MediaTs extends Model {
                     allowNull: true
                 },
             },
-            {
-                sequelize,
-                underscored: true
-            }
+            options,
         )
     }
 }

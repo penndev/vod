@@ -17,6 +17,9 @@ export const md5laragefile = (p :string) => {
         filestream.on('end', () => {
             resolve(md5sum.digest('hex'))
         })
+        filestream.on('error', (err) => {
+            reject(err)
+        })
     })
 }
 
@@ -28,8 +31,8 @@ export const sleep = (ms: number) => {
 
 export const ismkdir = (filepath: string) => {
     const dir = parse(filepath).dir;
-    return new Promise((resolve, reject) => {
-        access(dir, constants.F_OK, (err) => {
+    return new Promise((resolve) => {
+        access(dir, constants.F_OK, () => {
             resolve(mkdirSync(dir,{recursive: true}))
         });
     })
@@ -38,7 +41,7 @@ export const ismkdir = (filepath: string) => {
 export const randomstr = (length: number) => {
     const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result           = '';
-    for ( var i = 0; i < length; i++ ) {
+    for ( let i = 0; i < length; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
@@ -47,5 +50,6 @@ export const randomstr = (length: number) => {
 export const networks = (host: string) => {
     const netInterface = Object.values(os$3.networkInterfaces())
     const netFlatMap = netInterface.flatMap((nInterface) => nInterface ?? [])
+    host as string
     return netFlatMap.filter((detail) => detail && detail.address && detail.family == 'IPv4')
 }

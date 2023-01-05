@@ -28,7 +28,7 @@ app.use(serverAdapter.registerPlugin()) // 注册bull-board 控制面板
 app.use(route.routes()) // 请求路由
 
 app.listen(config.port, config.host)
-for(let item of networks(config.host)){
+for(const item of networks(config.host)){
     console.log('\x1b[34mOPEN Brower\x1b[1;33m -> \x1b[0;32mhttp://%s:%s\x1b[0m', item.address, config.port)
 }
 

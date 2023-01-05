@@ -8,7 +8,7 @@ import { dirname, join } from 'path'
 const mpegtsQueue = new Queue('Mpegts analyze', config.rdsuri)
 
 // @param jobData  Media 实例json
-const callBack:Queue.ProcessCallbackFunction<any> = async(job,done)=>{
+const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
     const jobData = job.data as Media
     const hlsContent = createReadStream(jobData.hlsPath)
     let sequence = 1

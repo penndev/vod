@@ -77,17 +77,25 @@ export const adminList = async (ctx:Router.RouterContext) => {
     const page = Number(ctx.request.query.page)
     const limit = Number(ctx.request.query.limit)
     
-    let whereArr: WhereOptions = {} 
+    const whereArr: WhereOptions = {} 
     const email = ctx.request.query.email
     if(email !== undefined){
         whereArr.email = {[Op.like]: '%' + email + '%'}
     }
 
     const { rows, count } = await Admin.findAndCountAll({
+        attributes: { exclude: ['passwd'] },
         offset: page * limit - limit,
         limit: limit,
         where: whereArr,
     })
+    for(const row of rows){
+        if(row.roleId == 0){
+            row.roleName = '超级管理员'
+        }else {
+            row.roleName = '权限名称'
+        }
+    }
     ctx.body = {
         data: rows,
         total: count
@@ -156,7 +164,7 @@ export const roleList = async (ctx:Router.RouterContext) => {
     const page = Number(ctx.request.query.page)
     const limit = Number(ctx.request.query.limit)
     
-    let whereArr: WhereOptions = {} 
+    const whereArr: WhereOptions = {} 
     const name = ctx.request.query.name
     if(name !== undefined){
         whereArr.name = {[Op.like]: '%' + name + '%'}
@@ -167,7 +175,7 @@ export const roleList = async (ctx:Router.RouterContext) => {
         limit: limit,
         where: whereArr,
     })
-    for(let i of rows){
+    for(const i of rows){
         i.route = JSON.parse(i.route)
     }
     ctx.body = {
@@ -246,7 +254,7 @@ export const accessLog = async (ctx: Router.RouterContext) => {
     /**
      * Where 条件
      */
-    let where : WhereOptions = {}
+    const where : WhereOptions = {}
     const adminID = ctx.request.query.admin
     if(adminID !== undefined){
         where.admin = adminID

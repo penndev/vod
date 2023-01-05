@@ -7,7 +7,7 @@ import { md5laragefile } from '../util/index.js'
 const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri)
 
 // @param jobData  Media 实例json
-const callBack:Queue.ProcessCallbackFunction<any> = async (job, done) => {
+const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
     const jobData = job.data as Media
     const md5 = await md5laragefile(jobData.filePath)
     if (jobData.fileMd5 != md5) {
@@ -24,7 +24,7 @@ const callBack:Queue.ProcessCallbackFunction<any> = async (job, done) => {
             done()
         }
         const streams = data.streams
-        for (let item of streams) {
+        for (const item of streams) {
             if (item.codec_type == 'video') {
                 Media.update({
                     status: 1,

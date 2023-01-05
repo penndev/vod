@@ -42,7 +42,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
             return
         }
         ctx.state = adminInfo
-    } catch (error:any) {
+    } catch (error) {
         ctx.status = 401, ctx.body = {'message':'用户验证失败[' + error + ']'}
         return
     }
