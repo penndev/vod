@@ -12,8 +12,6 @@ class Admin extends Model {
     declare passwd: string
     declare roleId: number
     declare status: number
-    
-    declare Role: any
         
     // 结构体
     static initial(options: InitOptions) {
@@ -59,8 +57,7 @@ class Role extends Model{
     declare name: string
     declare status: number
     declare menu: string
-    declare route: string
-
+    declare route: string // [{path:'admin/list'},]
     public static initial(options: InitOptions)  {
         this.init(
             {

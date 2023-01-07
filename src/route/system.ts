@@ -89,10 +89,6 @@ export const adminList = async (ctx:Router.RouterContext) => {
         offset: page * limit - limit,
         limit: limit,
         where: whereArr,
-        // include: {
-        //     model: Role,
-        //     attributes: ['name']
-        // },
     })
     for(const i in rows){
         if (rows[i].roleId == 0){
