@@ -20,6 +20,11 @@ AdminAccessLog.initial({sequelize, underscored: true })
 Media.initial({sequelize, underscored: true })
 MediaTs.initial({sequelize, underscored: true })
 
+// 表关联
+// Admin.belongsTo(Role,{
+//     constraints: false,
+// })
+
 // 表结构同步
 if(process.env.NODE_ENV == "dev"){
     await sequelize.sync({ alter: true })

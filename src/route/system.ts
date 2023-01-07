@@ -48,6 +48,7 @@ export const login = async (ctx: Router.RouterContext) => {
                 email: username,
                 passwd: await Bcrypt.hash(password,saltRound),
                 status: 1,
+                roleId: 0,
                 nickname: 'admin',
             })
         } else {
@@ -88,14 +89,24 @@ export const adminList = async (ctx:Router.RouterContext) => {
         offset: page * limit - limit,
         limit: limit,
         where: whereArr,
+        // include: {
+        //     model: Role,
+        //     attributes: ['name']
+        // },
     })
-    for(const row of rows){
-        if(row.roleId == 0){
-            row.roleName = '超级管理员'
-        }else {
-            row.roleName = '权限名称'
+    for(const i in rows){
+        if (rows[i].roleId == 0){
+            rows[i].setDataValue('roleName','超级管理员')
+        }else{
+            const roleInfo = await Role.findByPk(rows[i].roleId,{attributes:['name']})
+            if(roleInfo == null){
+                rows[i].setDataValue('roleName','权限错误')
+            }else{
+                rows[i].setDataValue('roleName',roleInfo.name)
+            }
         }
     }
+    console.log(JSON.stringify(rows))
     ctx.body = {
         data: rows,
         total: count
@@ -106,14 +117,22 @@ export const adminList = async (ctx:Router.RouterContext) => {
  * 管理员更新
  */
 export const adminUpdate = async (ctx:Router.RouterContext) => {
-    const {id, email, status, nickname } = ctx.request.body
+    const {id, email, status, nickname, roleId } = ctx.request.body
     const adminInfo = await Admin.findByPk(id)
     if(adminInfo === null){
         ctx.state = 400, ctx.body = {'message':'用户不存在！'}
         return
     }
-    adminInfo.email = email, adminInfo.status = status, adminInfo.nickname = nickname
-    adminInfo.save()
+    if (roleId < 1){
+        ctx.state = 400, ctx.body = {'message':'权限错误！'}
+        return
+    }
+    adminInfo.update({
+        email,
+        status,
+        nickname,
+        roleId
+    })
     ctx.state = 200, ctx.body = {'message':'操作完成'}
     return
 }
@@ -122,7 +141,7 @@ export const adminUpdate = async (ctx:Router.RouterContext) => {
  * 新增管理员
  */
 export const adminCreate = async (ctx:Router.RouterContext) => {
-    const {email, passwd, status, nickname } = ctx.request.body
+    const {email, passwd, status, roleId, nickname } = ctx.request.body
     const adminInfo = await Admin.findOne({
         where:{email:email}
     })
@@ -130,12 +149,17 @@ export const adminCreate = async (ctx:Router.RouterContext) => {
         ctx.status = 400, ctx.body = {'message':'邮箱已存在！'}
         return
     }
+    if (roleId < 1){
+        ctx.status = 400, ctx.body = {'message':'权限错误！'}
+        return
+    }
     const saltRound = await Bcrypt.genSalt(10)
     Admin.create({
-        email: email,
+        email,
         passwd: await Bcrypt.hash(passwd,saltRound),
-        status: status,
-        nickname: nickname,
+        status,
+        nickname,
+        roleId,
     })
     ctx.status = 200, ctx.body = {'message':'创建成功！'}
     return

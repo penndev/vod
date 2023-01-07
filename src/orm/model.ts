@@ -12,13 +12,12 @@ class Admin extends Model {
     declare passwd: string
     declare roleId: number
     declare status: number
-
-    // 实际不存在的对象
-    declare roleName : string
     
+    declare Role: any
+        
     // 结构体
     static initial(options: InitOptions) {
-        this.init(
+        Admin.init(
             {
                 email: {
                     type: DataTypes.STRING,
@@ -42,26 +41,13 @@ class Admin extends Model {
                     allowNull: false,
                     comment: '0超级管理员'
                 },
-                roleName: {
-                    type: DataTypes.VIRTUAL,
-                    get() {
-                        if(this.roleId == 0){
-                            return '超级管理员'
-                        }else{
-                            Role.findByPk(this.roleId).then(roleInfo => {
-                                if (roleInfo !== null){
-                                    return roleInfo.name
-                                }else{
-                                    return '权限错误'
-                                }
-                            })
-                        }
-                    },
-                }
             },  options
         )
+        
+        // Admin.belongsTo(Role)
     }
 }
+
 
 /**
  * 角色列表
