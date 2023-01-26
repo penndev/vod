@@ -1,7 +1,7 @@
 import Router from "@koa/router"
 import { auth } from "../middle/index.js"
 import { accessLog, adminCreate, adminDelete, adminList, adminUpdate, captcha, login, roleCreate, roleDelete, roleList, roleUpdate } from "./system.js"
-import { mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
+import { mediaDelete, mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
@@ -25,11 +25,16 @@ router.use(auth)
     router.get('/system/admin/accesslog', accessLog)
 }
 
-// 媒体文件处理
-router.get('/media/list', mediaList)
-router.get('/media/mpegts/list', mediaMpegtsList)
-router.post('/media/upload/before', mediaUploadBefore) // 分片上传媒体文件
+// 分片上传媒体文件
+router.post('/media/upload/part', mediaUploadBefore) 
 router.put("/media/upload/part", mediaUploadPart)
+
+// 媒体文件
+router.get('/media/list', mediaList)
+router.delete('/media/list', mediaDelete)
+
+// 媒体切片
+router.get('/media/mpegts/list', mediaMpegtsList)
 
 // 后台运行的队列任务
 router.get('/job/hls/query', taskHlsQuery)

@@ -6,6 +6,7 @@ import { md5laragefile } from '../util/index.js'
 
 const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri)
 
+// 上传完毕后分析媒体文件内容
 // @param jobData  Media 实例json
 const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
     const jobData = job.data as Media

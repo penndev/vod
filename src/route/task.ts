@@ -42,13 +42,10 @@ export const taskMpegtsSubmit = async(ctx:Router.RouterContext) => {
     if (data == null){
         return
     }
-    data.hlsPath = `data/${data.id}/hls/index.m3u8`
-    data.hlsKey = randomstr(16)
-    data.save()
     const queue = await mpegtsQueue.add(data)
     ctx.body = {
         jobId: queue.id,
-        message: `转码任务为-> ${queue.id}`
+        message: `分析任务为-> ${queue.id}`
     }
 }
 

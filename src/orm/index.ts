@@ -17,7 +17,13 @@ await sequelize.authenticate()
 Admin.initial({sequelize, underscored: true })
 Role.initial({sequelize, underscored: true })
 AdminAccessLog.initial({sequelize, underscored: true })
-Media.initial({sequelize, underscored: true })
+
+Media.initial({
+    sequelize, 
+    underscored: true, //下划线命名
+    paranoid: true,    //安全删除
+})
+
 MediaTs.initial({sequelize, underscored: true })
 
 // 表关联
