@@ -10,6 +10,8 @@ router.get('/captcha', captcha) // 全局验证码
 router.post('/login', login) // 管理员登录
 
 router.use(auth)
+
+
 {
     // 系统管理员操作
     router.get('/system/admin', adminList)
@@ -25,16 +27,19 @@ router.use(auth)
     router.get('/system/admin/accesslog', accessLog)
 }
 
-// 分片上传媒体文件
-router.post('/media/upload/part', mediaUploadBefore) 
-router.put("/media/upload/part", mediaUploadPart)
+{
+    // 分片上传媒体文件
+    router.post('/media/upload/part', mediaUploadBefore) 
+    router.put("/media/upload/part", mediaUploadPart)
 
-// 媒体文件
-router.get('/media/list', mediaList)
-router.delete('/media/list', mediaDelete)
+    // 媒体文件
+    router.get('/media/list', mediaList)
+    router.delete('/media/list', mediaDelete)
 
-// 媒体切片
-router.get('/media/mpegts/list', mediaMpegtsList)
+    // 媒体切片
+    router.get('/media/mpegts/list', mediaMpegtsList)
+}
+
 
 // 后台运行的队列任务
 router.get('/job/hls/query', taskHlsQuery)

@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
-import { AdminAccessLog, Admin, Media, MediaTs, Role } from './model.js'
+import { AdminAccesslog, Admin, Media, MediaTs, AdminRole } from './model.js'
 
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
@@ -15,8 +15,8 @@ await sequelize.authenticate()
 
 // 表注册
 Admin.initial({sequelize, underscored: true })
-Role.initial({sequelize, underscored: true })
-AdminAccessLog.initial({sequelize, underscored: true })
+AdminRole.initial({sequelize, underscored: true })
+AdminAccesslog.initial({sequelize, underscored: true })
 
 Media.initial({
     sequelize, 
@@ -27,7 +27,7 @@ Media.initial({
 MediaTs.initial({sequelize, underscored: true })
 
 // 表关联
-// Admin.belongsTo(Role,{
+// Admin.belongsTo(AdminRole,{
 //     constraints: false,
 // })
 
@@ -38,8 +38,8 @@ if(process.env.NODE_ENV == "dev"){
 
 export {
     Admin,
-    Role,
-    AdminAccessLog,
+    AdminRole,
+    AdminAccesslog,
     Media,
     MediaTs,
 }

@@ -29,11 +29,11 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
             if (item.codec_type == 'video') {
                 Media.update({
                     status: 1,
-                    videoDuration: item.duration,
-                    videoFps: item.level,
-                    videoBitrate: item.bit_rate,
-                    videoWidth: item.width,
-                    videoHeight: item.height,
+                    videoDuration: Number(item.duration),
+                    videoFps: Number(item.level),
+                    videoBitrate: Number(item.bit_rate),
+                    videoWidth: Number(item.width),
+                    videoHeight: Number(item.height),
                 }, {
                     where: {
                         id: jobData.id

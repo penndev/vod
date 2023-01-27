@@ -41,8 +41,6 @@ class Admin extends Model {
                 },
             },  options
         )
-        
-        // Admin.belongsTo(Role)
     }
 }
 
@@ -50,7 +48,7 @@ class Admin extends Model {
 /**
  * 角色列表
  */
-class Role extends Model{
+class AdminRole extends Model{
     declare id: number
     declare createdAt: Date;
     declare updatedAt: Date;
@@ -87,7 +85,7 @@ class Role extends Model{
 /**
  * 权限访问日志
  */
-class AdminAccessLog extends Model {
+class AdminAccesslog extends Model {
     declare id: number
     declare createdAt: Date;
     declare updatedAt: Date;
@@ -176,7 +174,7 @@ class Media extends Model {
                     comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
                 },
                 videoDuration: {
-                    type: DataTypes.FLOAT.UNSIGNED,
+                    type: DataTypes.INTEGER.UNSIGNED,
                     defaultValue: 0,
                     comment: '视频时长'
                 },
@@ -267,8 +265,8 @@ class MediaTs extends Model {
 
 export {
     Admin,
-    Role,
-    AdminAccessLog,
+    AdminRole,
+    AdminAccesslog,
     Media,
     MediaTs,
 }

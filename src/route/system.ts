@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { Admin, AdminAccessLog, Role } from '../orm/index.js'
+import { Admin, AdminAccesslog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
@@ -94,7 +94,7 @@ export const adminList = async (ctx:Router.RouterContext) => {
         if (rows[i].roleId == 0){
             rows[i].setDataValue('roleName','超级管理员')
         }else{
-            const roleInfo = await Role.findByPk(rows[i].roleId,{attributes:['name']})
+            const roleInfo = await AdminRole.findByPk(rows[i].roleId,{attributes:['name']})
             if(roleInfo == null){
                 rows[i].setDataValue('roleName','权限错误')
             }else{
@@ -190,7 +190,7 @@ export const roleList = async (ctx:Router.RouterContext) => {
         whereArr.name = {[Op.like]: '%' + name + '%'}
     }
 
-    const { rows, count } = await Role.findAndCountAll({
+    const { rows, count } = await AdminRole.findAndCountAll({
         offset: page * limit - limit,
         limit: limit,
         where: whereArr,
@@ -209,7 +209,7 @@ export const roleList = async (ctx:Router.RouterContext) => {
  */
 export const roleUpdate = async (ctx:Router.RouterContext) => {
     const { id, name, status, menu, route } = ctx.request.body
-    const roleInfo = await Role.findByPk(id)
+    const roleInfo = await AdminRole.findByPk(id)
     if(roleInfo === null){
         ctx.state = 400, ctx.body = {'message':'用户不存在！'}
         return
@@ -228,7 +228,7 @@ export const roleUpdate = async (ctx:Router.RouterContext) => {
  */
 export const roleCreate = async (ctx:Router.RouterContext) => {
     const {name, status, menu, route } = ctx.request.body
-    const roleInfo = await Role.findOne({
+    const roleInfo = await AdminRole.findOne({
         where:{name}
     })
     if (roleInfo !== null) {
@@ -236,7 +236,7 @@ export const roleCreate = async (ctx:Router.RouterContext) => {
         return
     }
     const routeJson = JSON.stringify(route)
-    Role.create({
+    AdminRole.create({
         name,
         status,
         menu,
@@ -251,7 +251,7 @@ export const roleCreate = async (ctx:Router.RouterContext) => {
  */
 export const roleDelete = async (ctx:Router.RouterContext) => {
     const id = ctx.request.query.id
-    const roleInfo = await Role.findByPk(Number(id))
+    const roleInfo = await AdminRole.findByPk(Number(id))
     if(roleInfo === null){
         ctx.status = 400, ctx.body = {'message':'管理员不存在'}
         return
@@ -294,7 +294,7 @@ export const accessLog = async (ctx: Router.RouterContext) => {
         }
     }
 
-    const { rows, count } = await AdminAccessLog.findAndCountAll({
+    const { rows, count } = await AdminAccesslog.findAndCountAll({
         offset, limit, where, order
     })
     ctx.body = {
