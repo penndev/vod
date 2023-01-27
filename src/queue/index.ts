@@ -5,8 +5,8 @@ import ffmpegQueue from "./ffmpeg.js";
 import ffprobeQueue from './ffprobe.js'
 import mpegtsQueue from './mpegts.js';
 
-
 const serverAdapter = new KoaAdapter();
+
 // 队列添加到仪表盘
 createBullBoard({
     queues: [
@@ -16,13 +16,11 @@ createBullBoard({
     ],
     serverAdapter
 })
-// 设置仪表盘的目录
-serverAdapter.setBasePath('/bull');
-
 
 export {
     serverAdapter,
     ffmpegQueue,
     ffprobeQueue,
     mpegtsQueue,
+    // bull,
 }

@@ -1,8 +1,10 @@
 import Router from '@koa/router'
 import { Next } from 'koa'
+import { koaBody } from 'koa-body'
 import Jwt from 'jsonwebtoken'
 import config from '../config/index.js'
-import { AdminAccessLog, Admin, Role } from '../orm/model.js'
+import { AdminAccesslog, Admin, AdminRole } from '../orm/model.js'
+import { serverAdapter } from '../queue/index.js'
 
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
     if (ctx.method !== 'OPTIONS') {
@@ -65,7 +67,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
 
     //判断是否需要进行接口鉴权
     if(adminInfo.roleId != 0){
-        const roleInfo = await Role.findByPk(adminInfo.roleId)
+        const roleInfo = await AdminRole.findByPk(adminInfo.roleId)
         if(roleInfo == null){
             ctx.status = 403, ctx.body = {messge:'权限匹配失败'}
             return 
@@ -84,7 +86,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         }
     }
     await next()
-    AdminAccessLog.create({
+    AdminAccesslog.create({
         admin: adminInfo.id,
         path:ctx.URL.pathname,
         method: ctx.request.method,
@@ -93,3 +95,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         status: ctx.response.status
     })
 }
+
+export const body = koaBody({multipart:true})
+
+export const bull = serverAdapter.setBasePath('/bull').registerPlugin()

@@ -1,50 +1,58 @@
 import Router from "@koa/router"
+
 import { auth } from "../middle/index.js"
-import { accessLog, adminCreate, adminDelete, adminList, adminUpdate, captcha, login, roleCreate, roleDelete, roleList, roleUpdate } from "./system.js"
-import { mediaDelete, mediaList, mediaMpegtsList, mediaUploadBefore, mediaUploadPart } from "./media.js"
+import { AdminController, captcha, login, RoleController } from "./system.js"
+import { MediaController, MpegtsController, UploadMedia } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
 
 router.get('/captcha', captcha) // 全局验证码
-router.post('/login', login) // 管理员登录
+router.post('/login', login)    // 管理员登录
+ 
 
+/**
+ * 下面所有的接口都需要登录
+ */
 router.use(auth)
 
 
-{
+/**
+ * 系统类接口
+ */
+{ 
     // 系统管理员操作
-    router.get('/system/admin', adminList)
-    router.put('/system/admin', adminUpdate)
-    router.post('/system/admin', adminCreate)
-    router.delete('/system/admin', adminDelete)
+    router.get('/system/admin', AdminController.List)
+    router.put('/system/admin', AdminController.Update)
+    router.post('/system/admin', AdminController.Create)
+    router.delete('/system/admin', AdminController.Delete)
+    router.get('/system/admin/accesslog', AdminController.AccessLog)
     // 系统角色处理
-    router.get('/system/role', roleList)
-    router.put('/system/role', roleUpdate)
-    router.post('/system/role', roleCreate)
-    router.delete('/system/role', roleDelete)
-    // 管理员访问日志
-    router.get('/system/admin/accesslog', accessLog)
+    router.get('/system/role', RoleController.List)
+    router.put('/system/role', RoleController.Update)
+    router.post('/system/role', RoleController.Create)
+    router.delete('/system/role', RoleController.Delete)
 }
 
+/**
+ * 处理媒体类接口
+ */
 {
-    // 分片上传媒体文件
-    router.post('/media/upload/part', mediaUploadBefore) 
-    router.put("/media/upload/part", mediaUploadPart)
+    router.post('/media/upload/part', UploadMedia.Before) 
+    router.put("/media/upload/part", UploadMedia.Part)
 
-    // 媒体文件
-    router.get('/media/list', mediaList)
-    router.delete('/media/list', mediaDelete)
+    router.get('/media/list', MediaController.List)
+    router.delete('/media/list', MediaController.Delete)
 
     // 媒体切片
-    router.get('/media/mpegts/list', mediaMpegtsList)
+    router.get('/media/mpegts/list', MpegtsController.List)
+
+    // 队列文件校验
+    router.get('/job/hls/query', taskHlsQuery)
+    router.post('/job/hls/submit', taskHlsSubmit)
+    // 队列视频转码
+    router.get('/job/mpegts/query', taskMpegtsQuery)
+    router.post('/job/mpegts/submit', taskMpegtsSubmit)
 }
 
-
-// 后台运行的队列任务
-router.get('/job/hls/query', taskHlsQuery)
-router.post('/job/hls/submit', taskHlsSubmit)
-router.get('/job/mpegts/query', taskMpegtsQuery)
-router.post('/job/mpegts/submit', taskMpegtsSubmit)
-
-export default router
+export default router.routes()
