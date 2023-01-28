@@ -1,11 +1,16 @@
 import Router from "@koa/router"
 
-import { auth } from "../middle/index.js"
+import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
 import { MediaController, MpegtsController, UploadMedia } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
+
+/**
+ * 允许post参数与文件上传
+ */
+router.use(body)
 
 router.get('/captcha', captcha) // 全局验证码
 router.post('/login', login)    // 管理员登录

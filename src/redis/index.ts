@@ -1,14 +1,14 @@
 import { createClient } from 'redis';
 import config from '../config/index.js';
 
-const client = createClient({
+const redis = createClient({
     url: config.rdsuri,
 })
 
 
-client.on('error', (err) => console.log('Redis Client Error', err))
+redis.on('error', (err) => console.log('Redis Client Error', err))
 
-await client.connect();
+await redis.connect();
 
 
-export default client
+export default redis

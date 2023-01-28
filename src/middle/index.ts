@@ -9,19 +9,26 @@ import { serverAdapter } from '../queue/index.js'
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
     if (ctx.method !== 'OPTIONS') {
         await next()
+        ctx.set('Access-Control-Allow-Origin', '*')
     }else{
         ctx.status = 204;
+        ctx.set('Access-Control-Allow-Origin', '*')
+        ctx.set('Access-Control-Allow-Methods', '*')
+        ctx.set('Access-Control-Allow-Headers', '*')
     }
-    ctx.set('Access-Control-Allow-Origin', '*')
-    ctx.set('Access-Control-Allow-Methods', '*')
-    ctx.set('Access-Control-Allow-Headers', '*')
+    // ctx.set('Access-Control-Allow-Origin', '*')
+    // ctx.set('Access-Control-Allow-Methods', '*')
+    // ctx.set('Access-Control-Allow-Headers', '*')
+    // ctx.set('Access-Control-Allow-Credentials', "true")
 }
 
-export const time = async (ctx: Router.RouterContext, next: Next) => {
+export const log = async (ctx: Router.RouterContext, next: Next) => {
     const start = Date.now();
     try {
         await next();
     } catch (error) {
+        let date = new Date()
+        console.error("\x1b[31m [%s] %s", date.toISOString(), error)
         const err = (error as Error)
         ctx.status = 500
         ctx.body = {
