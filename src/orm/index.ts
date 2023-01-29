@@ -33,7 +33,7 @@ MediaTs.initial({sequelize, underscored: true })
 
 // 表结构同步
 if(process.env.NODE_ENV == "dev"){
-    await sequelize.sync({ alter: true })
+    // await sequelize.sync({ alter: true })
 }
 
 export {

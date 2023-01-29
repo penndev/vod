@@ -4,9 +4,24 @@ import { File } from 'formidable'
 import { readFileSync, writeFileSync } from "fs"
 import ffprobeQueue from "../queue/ffprobe.js"
 import { ismkdir } from "../util/index.js"
+import redis from "../redis/index.js"
 
 /**上传媒体文件 */
+interface uploadPart {
+    totalSize: number;  // 总文件大小
+    singleSize: number; // 单分片大小
+    totalCount: number; // 共分了多少片 
+    toCount: number; // 上传到了多少片
+    fid: number;   // 文件ID 
+    fmd5: string;  // 文件MD5
+    fpath: string; // 文件存储路径
+}
+
 export class UploadMedia{
+
+    static CacheKey(key:string){
+        return 'upload-media-' + key 
+    }
 
     /**
      * 上传文件前置创建文件
@@ -14,6 +29,14 @@ export class UploadMedia{
      */
     static async Before (ctx: Router.RouterContext) {
         const { name, md5 } = ctx.request.body
+        // const h = await redis.get(UploadMedia.CacheKey(md5))
+        const cacheKey = UploadMedia.CacheKey(md5)
+        // const cacheDate = await redis.hGetAll()
+        redis.hGet()
+        cacheDate
+        console.log("penndev->", typeof cacheDate)
+        // const mdata = cacheDate["penn"]
+
         const data = await Media.create({
             fileName: name,
             fileMd5: md5,
