@@ -133,12 +133,13 @@ class Media extends Model {
     declare createdAt: Date;
     declare updatedAt: Date;
 
+    declare node: string
+    declare status: number
+
     declare fileName: string
     declare filePath: string
     declare fileMd5: string
     declare fileSize: number
-
-    declare status: number
 
     declare videoDuration: number
     declare videoFps: number
@@ -152,6 +153,15 @@ class Media extends Model {
     public static initial(options: InitOptions) {
         this.init(
             {
+                node: {
+                    type: DataTypes.STRING,
+                    allowNull: false,
+                },
+                status: {
+                    type: DataTypes.TINYINT,
+                    defaultValue: 0,
+                    comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
+                },
                 fileName: {
                     type: DataTypes.STRING,
                     allowNull: false,
@@ -167,11 +177,6 @@ class Media extends Model {
                 fileSize: {
                     type: DataTypes.INTEGER.UNSIGNED,
                     defaultValue: 0,
-                },
-                status: {
-                    type: DataTypes.TINYINT,
-                    defaultValue: 0,
-                    comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
                 },
                 videoDuration: {
                     type: DataTypes.INTEGER.UNSIGNED,

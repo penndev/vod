@@ -5,10 +5,8 @@ const redis = createClient({
     url: config.rdsuri,
 })
 
-
-redis.on('error', (err) => console.log('Redis Client Error', err))
+redis.on('error', (err) => console.log('redis connection fail[ %s ]', err))
 
 await redis.connect();
-
 
 export default redis

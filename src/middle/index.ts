@@ -43,6 +43,7 @@ export const log = async (ctx: Router.RouterContext, next: Next) => {
     console.log('\x1b[32m%s\x1b[33m\t[%s]\x1b[32m[%sms]\x1b[0m -> \x1b[1;35m%s\x1b[0m', ctx.request.method, ctx.response.status, ms, ctx.request.URL)
 }
 
+/**admin api 鉴权 */
 export const auth = async (ctx: Router.RouterContext, next: Next) => {
     const token = ctx.request.header['x-token'] 
     if(typeof token !== 'string' || !token){
@@ -103,6 +104,8 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     })
 }
 
+/**koa post 拓展 */
 export const body = koaBody({multipart:true})
 
+/**bull koa adapter面板 */
 export const bull = serverAdapter.setBasePath('/bull').registerPlugin()

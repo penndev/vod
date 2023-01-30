@@ -2,7 +2,7 @@ import Router from "@koa/router"
 
 import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
-import { MediaController, MpegtsController, UploadMedia } from "./media.js"
+import { MediaController, MediaTsController, UploadMedia } from "./media.js"
 import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
@@ -50,7 +50,7 @@ router.use(auth)
     router.delete('/media/list', MediaController.Delete)
 
     // 媒体切片
-    router.get('/media/mpegts/list', MpegtsController.List)
+    router.get('/media/mpegts/list', MediaTsController.List)
 
     // 队列文件校验
     router.get('/job/hls/query', taskHlsQuery)
