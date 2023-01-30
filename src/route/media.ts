@@ -92,7 +92,6 @@ export class UploadMedia{
             return
         }
         const partData:uploadPart = JSON.parse(cacheData)
-        console.log(partData.ucount, parseInt(currentPart))
         if(partData.ucount !== parseInt(currentPart)){
             ctx.status = 400
             ctx.body = {message:"currentPart失败"}
@@ -104,10 +103,11 @@ export class UploadMedia{
         partData.ucount = parseInt(currentPart) + 1
         await redis.SET(cacheKey,JSON.stringify(partData),{EX:86400})
 
-        // 判断是否是最后一次上传。修改文件状态。
+        // 判断是否是最后一次上传。修改文件状态。 因为提前加1了。所以是floor
         if(partData.ucount === Math.floor(partData.fsize/partData.urate)){ // 查验文件信息
             const data = await Media.findByPk(partData.fid)
             ffprobeQueue.add(data)
+            await redis.DEL(cacheKey)
         }
 
         ctx.body = {
