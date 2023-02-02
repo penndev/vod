@@ -32,6 +32,7 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
         }
     }
     done()
+    return
 }
 
 if ( ["queue","dev"].includes(process.env.NODE_ENV as string)){

@@ -28,6 +28,7 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
         job.log(stderr)
         Media.update({ status: -2 }, { where: { id: jobData.id } })
         done()
+        return
     })
     transcoding.on('progress', async (progress) => {
         job.progress(progress.percent)
@@ -38,7 +39,8 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
         writeFileSync(jobData.hlsPath, newHlsContent)
         Media.update({ status: 2 }, { where: { id: jobData.id } })
         job.log("转码完成")
-        done()  
+        done()
+        return 
     })
     transcoding.save(jobData.hlsPath)
 }

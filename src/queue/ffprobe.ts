@@ -14,6 +14,7 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
     if (jobData.fileMd5 != md5) {
         Media.update({ status: -1, }, { where: { id: jobData.id } })
         done()
+        return
     }
     const analyze = ffmpeg(jobData.filePath)
     analyze.ffprobe(function (err, data) {
@@ -23,6 +24,7 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
         if (typeof data.streams != 'object') {
             Media.update({ status: -2, }, { where: { id: jobData.id } })
             done()
+            return
         }
         const streams = data.streams
         for (const item of streams) {
@@ -42,6 +44,7 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
             }
         }
         done()
+        return
     })
 }
 

@@ -1,6 +1,6 @@
 import Koa from 'koa'
 
-import { cors, log, bull } from './middle/index.js'
+import { cors, log, bull, mount } from './middle/index.js'
 import routes from './route/index.js'
 import config from './config/index.js'
 import { networks } from './util/index.js'
@@ -12,8 +12,11 @@ app.use(cors), app.use(log)
 // 请求路由主入口
 app.use(routes)
 
+// 挂载静态入口
+app.use(mount("/data","./data"))
+
 if(process.env.NODE_ENV == "dev"){
-    app.use(bull) // protocol://host/bull
+    app.use(bull('/bull')) // protocol://host/bull
 }
 
 app.listen(config.port, config.host)

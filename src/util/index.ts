@@ -53,3 +53,11 @@ export const networks = (host: string) => {
     host as string
     return netFlatMap.filter((detail) => detail && detail.address && detail.family == 'IPv4')
 }
+
+export const parseNumber = (value:any, defaultValue:number) => {
+    var num = parseInt(value);
+    if (isNaN(num)) {
+      return defaultValue;
+    }
+    return num;
+}

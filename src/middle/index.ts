@@ -5,6 +5,10 @@ import Jwt from 'jsonwebtoken'
 import config from '../config/index.js'
 import { AdminAccesslog, Admin, AdminRole } from '../orm/model.js'
 import { serverAdapter } from '../queue/index.js'
+import { createReadStream, existsSync, statSync } from 'fs'
+import mime from 'mime'
+import { parseNumber } from '../util/index.js'
+
 
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
     if (ctx.method !== 'OPTIONS') {
@@ -108,4 +112,42 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
 export const body = koaBody({multipart:true})
 
 /**bull koa adapter面板 */
-export const bull = serverAdapter.setBasePath('/bull').registerPlugin()
+export const bull = (path:string)=> {
+    return  serverAdapter.setBasePath(path).registerPlugin()
+}
+
+export const mount = (u:string,d:string) => {
+    return (ctx: Router.RouterContext, next: Next)=>{
+        if(ctx.request.method === "GET" && ctx.URL.pathname.startsWith(u)){
+            const fspath = decodeURIComponent(ctx.URL.pathname.replace(RegExp('^'+u), d))
+            if(existsSync(fspath)){ //文件存在
+                const fsstat = statSync(fspath)
+                if(fsstat.isFile()){ // 处理发送文件，并实现 http range
+                    ctx.status = 206
+                    ctx.set('Accept-Ranges','bytes')
+                    ctx.set('Last-Modified', fsstat.birthtime.toUTCString())                    
+                    const ctype = mime.getType(fspath)
+                    if(ctype){
+                        ctx.set('Content-Type',ctype)
+                    }
+                    
+                    const range = ctx.request.headers.range
+                    if(range){
+                        const parts = range.replace(/bytes=/, "").split("-")
+                        const start = parseNumber(parts[0],0)
+                        const endbyte = parseNumber(parts[1], fsstat.size - 1 )
+                        const end = endbyte >= fsstat.size ? fsstat.size - 1 : endbyte 
+                        ctx.set('Content-Length',`${end - start + 1}`)
+                        ctx.set('Content-Range',`bytes ${start}-${end}/${fsstat.size}`)
+                        ctx.body = createReadStream(fspath,{start,end})
+                    }else{
+                        ctx.set('Content-Length',`${fsstat.size}`)
+                        ctx.body = createReadStream(fspath)
+                    }
+                    return
+                }
+            }
+        }
+        next()        
+    }
+}

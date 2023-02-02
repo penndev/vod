@@ -34,6 +34,7 @@
     "koa": "^2.13.4",
     "koa-body": "^6.0.1",
     "mariadb": "^3.0.2",
+    "mime": "^3.0.0",
     "redis": "^4.5.0",
     "sequelize": "^6.25.6",
     "svg-captcha": "^1.4.0"

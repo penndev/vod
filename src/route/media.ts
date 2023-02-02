@@ -103,8 +103,9 @@ export class UploadMedia{
         partData.ucount = parseInt(currentPart) + 1
         await redis.SET(cacheKey,JSON.stringify(partData),{EX:86400})
 
-        // 判断是否是最后一次上传。修改文件状态。 因为提前加1了。所以是floor
-        if(partData.ucount === Math.floor(partData.fsize/partData.urate)){ // 查验文件信息
+        // 判断是否是最后一次上传.
+        const totalPart = Math.ceil(partData.fsize/partData.urate)
+        if(partData.ucount === totalPart){ // 查验文件信息
             const data = await Media.findByPk(partData.fid)
             ffprobeQueue.add(data)
             await redis.DEL(cacheKey)
