@@ -108,7 +108,6 @@ export class AdminController{
                 }
             }
         }
-        console.log(JSON.stringify(rows))
         ctx.body = {
             data: rows,
             total: count

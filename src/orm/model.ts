@@ -147,9 +147,6 @@ class Media extends Model {
     declare videoWidth: number
     declare videoHeight: number
 
-    declare hlsPath: string
-    declare hlsKey: string
-
     public static initial(options: InitOptions) {
         this.init(
             {
