@@ -115,7 +115,7 @@ class AdminAccesslog extends Model {
                     comment:'请求地址'
                 },
                 payload: {
-                    type: DataTypes.STRING,
+                    type: DataTypes.TEXT,
                     comment:'请求体'
                 },
                 status: {

@@ -47,6 +47,7 @@ router.use(auth)
     router.put("/media/upload/part", UploadMedia.Part)
 
     router.get('/media/list', MediaController.List)
+    router.put('/media/list', MediaController.Update)
     router.delete('/media/list', MediaController.Delete)
 
     // 媒体切片

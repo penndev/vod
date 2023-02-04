@@ -4,7 +4,7 @@ import config from '../config/index.js'
 import { Media } from '../orm/index.js'
 import { md5laragefile } from '../util/index.js'
 
-const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri)
+const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri, {prefix:`bull-${config.node}`})
 
 // 上传完毕后分析媒体文件内容
 // @param jobData  Media 实例json

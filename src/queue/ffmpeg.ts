@@ -5,7 +5,7 @@ import config from '../config/index.js'
 import { ismkdir } from '../util/index.js'
 import { Media } from '../orm/index.js'
 
-const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri)
+const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri, {prefix:`bull-${config.node}`})
 
 // @param job.data  Media 序列化json数据
 const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{

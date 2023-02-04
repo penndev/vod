@@ -1,9 +1,9 @@
 import Router from "@koa/router"
 import { Media, MediaTs } from "../orm/model.js"
 import { File } from 'formidable'
-import { readFileSync, unlink, writeFileSync } from "fs"
+import { readFileSync, renameSync, unlink, writeFileSync } from "fs"
 import ffprobeQueue from "../queue/ffprobe.js"
-import { ismkdir } from "../util/index.js"
+import { ismkdir, parseNumber } from "../util/index.js"
 import redis from "../redis/index.js"
 import config from "../config/index.js"
 import { WhereOptions, Op } from 'sequelize'
@@ -123,20 +123,18 @@ export class UploadMedia{
 export class MediaController{
     /**
      * 媒体文件列表
-     * @param ctx 
      */
     static async List (ctx: Router.RouterContext) {
-        const page = Number(ctx.request.query.page)
-        const limit = Number(ctx.request.query.limit)
-        const name = ctx.request.query.name
-        const md5 = ctx.request.query.md5
+        const page = parseNumber(ctx.request.query.page,1)
+        const limit = parseNumber(ctx.request.query.limit,20)        
+        const { fileName, fileMd5 } = ctx.request.query
 
         const where: WhereOptions = {} 
-        if(name !== undefined){
-            where.fileName = {[Op.like]: '%' + name + '%'}
+        if(fileName){
+            where.fileName = {[Op.like]: '%' + fileName + '%'}
         }
-        if(md5 !== undefined){
-            where.fileMd5 = md5
+        if(fileMd5){
+            where.fileMd5 = fileMd5
         }
         const { rows, count } = await Media.findAndCountAll({
             offset: page * limit - limit,
@@ -150,6 +148,30 @@ export class MediaController{
     }
 
     /**
+     * 修改文件内容
+     */
+    static async Update (ctx: Router.RouterContext) {
+        // const id = parseNumber(ctx.request.body.id,0)
+        const { id,fileName } = ctx.request.body
+        const mediaInfo = await Media.findByPk(id)
+        if(mediaInfo == null ){
+            ctx.status = 400
+            ctx.body = {'message':'ID不存在'}
+            return
+        }
+
+        if(mediaInfo.fileName != fileName){
+            // 修改文件名 不修改文件名，防止-
+            // const filePath = mediaInfo.filePath.replace(mediaInfo.fileName,fileName)
+            // renameSync(mediaInfo.filePath,filePath)
+            // mediaInfo.filePath = filePath
+            mediaInfo.fileName = fileName
+        }
+        mediaInfo.save()
+        ctx.body = {'message':'修改完成'}
+    }
+
+    /**
      * 删除媒体文件
      */
     static async Delete (ctx: Router.RouterContext) {
@@ -159,6 +181,7 @@ export class MediaController{
             ctx.status = 400, ctx.body = {'message':'数据不存在'}
             return
         }
+        // 是否删除文件
         mediaInfo.destroy()
         ctx.status = 200, ctx.body = {'message': mediaInfo.fileName + '删除成功'}
         return
