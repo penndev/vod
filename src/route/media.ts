@@ -6,7 +6,7 @@ import ffprobeQueue from "../queue/ffprobe.js"
 import { ismkdir, parseNumber } from "../util/index.js"
 import redis from "../redis/index.js"
 import config from "../config/index.js"
-import { WhereOptions, Op } from 'sequelize'
+import { WhereOptions, Op, Order } from 'sequelize'
 
 /**上传媒体文件限制大小 */
 const urate = 5 * 1048576
@@ -125,21 +125,28 @@ export class MediaController{
      * 媒体文件列表
      */
     static async List (ctx: Router.RouterContext) {
-        const page = parseNumber(ctx.request.query.page,1)
-        const limit = parseNumber(ctx.request.query.limit,20)        
-        const { fileName, fileMd5 } = ctx.request.query
-
+        const query = ctx.request.query
+        const page = parseNumber(query.page,1)
+        const limit = parseNumber(query.limit,20)        
+        
         const where: WhereOptions = {} 
-        if(fileName){
-            where.fileName = {[Op.like]: '%' + fileName + '%'}
+        if(query.fileName){
+            where.fileName = {[Op.like]: '%' + query.fileName + '%'}
         }
-        if(fileMd5){
-            where.fileMd5 = fileMd5
+        if(query.fileMd5){
+            where.fileMd5 = query.fileMd5
         }
+
+        let order: Order = []
+        if(query.order == "-id"){
+            order = [['id','desc']]
+        }
+
         const { rows, count } = await Media.findAndCountAll({
             offset: page * limit - limit,
             limit: limit,
             where,
+            order,
         })
         ctx.body = {
             data: rows,
