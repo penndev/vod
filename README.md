@@ -7,8 +7,13 @@
 
 `npm run serve` 启动生产koa service
 
-`npm run queue` 启动生产bull
+`npm run queue` 启动生产bull queue
 
 # 配置
 
 `src/config/index.ts` 配置项
+
+
+## 依赖 FFMPEG
+
+
