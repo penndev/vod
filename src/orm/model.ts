@@ -3,7 +3,7 @@ import { DataTypes, Model,InitOptions } from 'sequelize'
 /**
  * 管理员列表
  */
-class Admin extends Model {
+class AdminUser extends Model {
     declare id: number
     declare createdAt: Date;
     declare updatedAt: Date;
@@ -15,7 +15,7 @@ class Admin extends Model {
         
     // 结构体
     static initial(options: InitOptions) {
-        Admin.init(
+        AdminUser.init(
             {
                 email: {
                     type: DataTypes.STRING,
@@ -128,7 +128,7 @@ class AdminAccesslog extends Model {
     }
 }
 
-class Media extends Model {
+class VideoFile extends Model {
     declare id: number
     declare createdAt: Date;
     declare updatedAt: Date;
@@ -217,58 +217,57 @@ class Media extends Model {
 }
 
 
-class MediaTs extends Model {
-    declare id: number
-    declare createdAt: Date
-    declare updatedAt: Date
+// class MediaTs extends Model {
+//     declare id: number
+//     declare createdAt: Date
+//     declare updatedAt: Date
 
-    declare mediaId: number
-    declare status: number
+//     declare mediaId: number
+//     declare status: number
 
-    declare tsPath: string
-    declare tsSize: number
-    declare tsSeq: number
-    declare tsExtinf: number
-    declare uploadUri: string
+//     declare tsPath: string
+//     declare tsSize: number
+//     declare tsSeq: number
+//     declare tsExtinf: number
+//     declare uploadUri: string
 
-    public static initial(options: InitOptions) {
-        this.init(
-            {
-                mediaId: {
-                    type: DataTypes.INTEGER.UNSIGNED,
-                },
-                status: {
-                    type: DataTypes.TINYINT.UNSIGNED,
-                    defaultValue: 0,
-                    comment: '0 未处理'
-                },
-                tsPath: {
-                    type: DataTypes.STRING,
-                },
-                tsSize: {
-                    type: DataTypes.INTEGER.UNSIGNED,
-                    defaultValue: 0,
-                },
-                tsSeq: {
-                    type: DataTypes.INTEGER.UNSIGNED,
-                },
-                tsExtinf: {
-                    type: DataTypes.FLOAT.UNSIGNED,
-                },
-                uploadUri: {
-                    type: DataTypes.STRING,
-                    allowNull: true
-                },
-            },
-            options,
-        )
-    }
-}
+//     public static initial(options: InitOptions) {
+//         this.init(
+//             {
+//                 mediaId: {
+//                     type: DataTypes.INTEGER.UNSIGNED,
+//                 },
+//                 status: {
+//                     type: DataTypes.TINYINT.UNSIGNED,
+//                     defaultValue: 0,
+//                     comment: '0 未处理'
+//                 },
+//                 tsPath: {
+//                     type: DataTypes.STRING,
+//                 },
+//                 tsSize: {
+//                     type: DataTypes.INTEGER.UNSIGNED,
+//                     defaultValue: 0,
+//                 },
+//                 tsSeq: {
+//                     type: DataTypes.INTEGER.UNSIGNED,
+//                 },
+//                 tsExtinf: {
+//                     type: DataTypes.FLOAT.UNSIGNED,
+//                 },
+//                 uploadUri: {
+//                     type: DataTypes.STRING,
+//                     allowNull: true
+//                 },
+//             },
+//             options,
+//         )
+//     }
+// }
 
 export {
-    Admin,
+    AdminUser,
     AdminRole,
     AdminAccesslog,
-    Media,
-    MediaTs,
+    VideoFile,
 }

@@ -3,12 +3,12 @@ import Queue from 'bull'
 import { readFileSync, writeFileSync } from 'fs'
 import config from '../config/index.js'
 import { ismkdir } from '../util/index.js'
-import { Media } from '../orm/index.js'
+import { VideoFile } from '../orm/index.js'
 
 const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri, {prefix:`bull:${config.node}`})
 
 // @param job.data  Media 序列化json数据
-const callBack:Queue.ProcessCallbackFunction<Media> = async(job,done)=>{
+const callBack:Queue.ProcessCallbackFunction<VideoFile> = async(job,done)=>{
     // const jobData =  job.data as Media
     // await ismkdir(jobData.hlsPath)
     // const keyfile = jobData.hlsPath.replace("index.m3u8", "index.key")

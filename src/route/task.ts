@@ -1,6 +1,6 @@
 import Router from "@koa/router"
-import { ffmpegQueue, mpegtsQueue } from "../queue/index.js"
-import { Media } from "../orm/model.js"
+import { ffmpegQueue } from "../queue/index.js"
+import { VideoFile } from "../orm/model.js"
 import { randomstr } from "../util/index.js"
 
 
@@ -34,28 +34,28 @@ export const taskHlsQuery = async(ctx:Router.RouterContext) => {
 
 
 
-// 提交分析任务
-// @param query id (媒体文件id)
-export const taskMpegtsSubmit = async(ctx:Router.RouterContext) => {
-    const id = Number(ctx.request.body.id)
-    const data = await Media.findByPk(id)
-    if (data == null){
-        return
-    }
-    const queue = await mpegtsQueue.add(data)
-    ctx.body = {
-        jobId: queue.id,
-        message: `分析任务为-> ${queue.id}`
-    }
-}
+// // 提交分析任务
+// // @param query id (媒体文件id)
+// export const taskMpegtsSubmit = async(ctx:Router.RouterContext) => {
+//     const id = Number(ctx.request.body.id)
+//     const data = await VideoFile.findByPk(id)
+//     if (data == null){
+//         return
+//     }
+//     const queue = await mpegtsQueue.add(data)
+//     ctx.body = {
+//         jobId: queue.id,
+//         message: `分析任务为-> ${queue.id}`
+//     }
+// }
 
-// 转码执行信息
-// @param query id 任务id
-export const taskMpegtsQuery = async(ctx:Router.RouterContext) => {
-    if (typeof ctx.query.id !== "string") {
-        return
-    }
-    const job = await mpegtsQueue.getJob(ctx.query.id)
-    ctx.body = job
-}
+// // 转码执行信息
+// // @param query id 任务id
+// export const taskMpegtsQuery = async(ctx:Router.RouterContext) => {
+//     if (typeof ctx.query.id !== "string") {
+//         return
+//     }
+//     const job = await mpegtsQueue.getJob(ctx.query.id)
+//     ctx.body = job
+// }
 

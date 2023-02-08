@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { Admin, AdminAccesslog, AdminRole } from '../orm/index.js'
+import { AdminUser, AdminAccesslog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
@@ -37,14 +37,14 @@ export const login = async (ctx: Router.RouterContext) => {
         ctx.status = 400, ctx.body = { message: '验证码错误' }
         return
     }
-    let adminInfo = await Admin.findOne({
+    let adminInfo = await AdminUser.findOne({
         where: { 'email': username }
     })
     if (adminInfo === null) {
-        const c = await Admin.count()
+        const c = await AdminUser.count()
         if (c < 1) {
             const saltRound = await Bcrypt.genSalt(10)
-            adminInfo = await Admin.create({
+            adminInfo = await AdminUser.create({
                 email: username,
                 passwd: await Bcrypt.hash(password,saltRound),
                 status: 1,
@@ -90,7 +90,7 @@ export class AdminController{
             whereArr.email = {[Op.like]: '%' + email + '%'}
         }
     
-        const { rows, count } = await Admin.findAndCountAll({
+        const { rows, count } = await AdminUser.findAndCountAll({
             attributes: { exclude: ['passwd'] },
             offset: page * limit - limit,
             limit: limit,
@@ -119,7 +119,7 @@ export class AdminController{
      */
     static async Update (ctx:Router.RouterContext) {
         const {id, email, status, nickname, roleId } = ctx.request.body
-        const adminInfo = await Admin.findByPk(id)
+        const adminInfo = await AdminUser.findByPk(id)
         if(adminInfo === null){
             ctx.state = 400, ctx.body = {'message':'用户不存在！'}
             return
@@ -143,7 +143,7 @@ export class AdminController{
      */
     static async Create (ctx:Router.RouterContext) {
         const {email, passwd, status, roleId, nickname } = ctx.request.body
-        const adminInfo = await Admin.findOne({
+        const adminInfo = await AdminUser.findOne({
             where:{email:email}
         })
         if (adminInfo !== null) {
@@ -155,7 +155,7 @@ export class AdminController{
             return
         }
         const saltRound = await Bcrypt.genSalt(10)
-        Admin.create({
+        AdminUser.create({
             email,
             passwd: await Bcrypt.hash(passwd,saltRound),
             status,
@@ -171,7 +171,7 @@ export class AdminController{
      */
     static async Delete (ctx:Router.RouterContext) {
         const id = ctx.request.query.id
-        const adminInfo = await Admin.findByPk(Number(id))
+        const adminInfo = await AdminUser.findByPk(Number(id))
         if(adminInfo === null){
             ctx.status = 400, ctx.body = {'message':'管理员不存在'}
             return

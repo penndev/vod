@@ -2,8 +2,8 @@ import Router from "@koa/router"
 
 import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
-import { MediaController, MediaTsController, UploadMedia } from "./media.js"
-import { taskHlsQuery, taskHlsSubmit, taskMpegtsQuery, taskMpegtsSubmit } from "./task.js"
+import { VideoFileController, UploadMedia } from "./media.js"
+// import { taskHlsQuery, taskHlsSubmit, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
 
@@ -43,22 +43,22 @@ router.use(auth)
  * 处理媒体类接口
  */
 {
-    router.post('/media/upload/part', UploadMedia.Before) 
-    router.put("/media/upload/part", UploadMedia.Part)
+    router.post('/video/upload/part', UploadMedia.Before) 
+    router.put('/video/upload/part', UploadMedia.Part)
 
-    router.get('/media/list', MediaController.List)
-    router.put('/media/list', MediaController.Update)
-    router.delete('/media/list', MediaController.Delete)
+    router.get('/video/file', VideoFileController.List)
+    router.put('/video/file', VideoFileController.Update)
+    router.delete('/video/file', VideoFileController.Delete)
 
     // 媒体切片
-    router.get('/media/mpegts/list', MediaTsController.List)
+    // router.get('/media/mpegts/list', MediaTsController.List)
 
     // 队列文件校验
-    router.get('/job/hls/query', taskHlsQuery)
-    router.post('/job/hls/submit', taskHlsSubmit)
-    // 队列视频转码
-    router.get('/job/mpegts/query', taskMpegtsQuery)
-    router.post('/job/mpegts/submit', taskMpegtsSubmit)
+    // router.get('/job/hls/query', taskHlsQuery)
+    // router.post('/job/hls/submit', taskHlsSubmit)
+    // // 队列视频转码
+    // // router.get('/job/mpegts/query', taskMpegtsQuery)
+    // router.post('/job/mpegts/submit', taskMpegtsSubmit)
 }
 
 export default router.routes()

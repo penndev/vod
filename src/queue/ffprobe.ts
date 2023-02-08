@@ -1,18 +1,18 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import config from '../config/index.js'
-import { Media } from '../orm/index.js'
+import { VideoFile } from '../orm/index.js'
 import { md5laragefile } from '../util/index.js'
 
 const ffprobeQueue = new Queue('ffprobe analyze', config.rdsuri, {prefix:`bull:${config.node}`})
 
 // 上传完毕后分析媒体文件内容
-// @param jobData  Media 实例json
-const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
-    const jobData = job.data as Media
+// @param jobData  VideoFile 实例json
+const callBack:Queue.ProcessCallbackFunction<VideoFile> = async (job, done) => {
+    const jobData = job.data as VideoFile
     const md5 = await md5laragefile(jobData.filePath)
     if (jobData.fileMd5 != md5) {
-        Media.update({ status: -1, }, { where: { id: jobData.id } })
+        VideoFile.update({ status: -1, }, { where: { id: jobData.id } })
         done()
         return
     }
@@ -22,14 +22,14 @@ const callBack:Queue.ProcessCallbackFunction<Media> = async (job, done) => {
             job.log(err)
         }
         if (typeof data.streams != 'object') {
-            Media.update({ status: -2, }, { where: { id: jobData.id } })
+            VideoFile.update({ status: -2, }, { where: { id: jobData.id } })
             done()
             return
         }
         const streams = data.streams
         for (const item of streams) {
             if (item.codec_type == 'video') {
-                Media.update({
+                VideoFile.update({
                     status: 1,
                     videoDuration: Number(item.duration),
                     videoFps: Number(item.level),

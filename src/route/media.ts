@@ -1,7 +1,7 @@
 import Router from "@koa/router"
-import { Media, MediaTs } from "../orm/model.js"
+import { VideoFile } from "../orm/model.js"
 import { File } from 'formidable'
-import { readFileSync, renameSync, unlink, writeFileSync } from "fs"
+import { readFileSync, unlink, writeFileSync } from "fs"
 import ffprobeQueue from "../queue/ffprobe.js"
 import { ismkdir, parseNumber } from "../util/index.js"
 import redis from "../redis/index.js"
@@ -42,13 +42,13 @@ export class UploadMedia{
             return 
         }
 
-        const exist = await Media.findOne({where:{ fileMd5:md5 } })
+        const exist = await VideoFile.findOne({where:{ fileMd5:md5 } })
         if (exist != null){
             ctx.status = 400, ctx.body = {message:"文件已存在"}
             return 
         }
 
-        const data = await Media.create({
+        const data = await VideoFile.create({
             fileName:name,
             fileMd5:md5,
             fileSize:size,
@@ -106,7 +106,7 @@ export class UploadMedia{
         // 判断是否是最后一次上传.
         const totalPart = Math.ceil(partData.fsize/partData.urate)
         if(partData.ucount === totalPart){ // 查验文件信息
-            const data = await Media.findByPk(partData.fid)
+            const data = await VideoFile.findByPk(partData.fid)
             ffprobeQueue.add(data)
             await redis.DEL(cacheKey)
         }
@@ -120,7 +120,7 @@ export class UploadMedia{
 /**
  * 媒体文件管理
  */
-export class MediaController{
+export class VideoFileController{
     /**
      * 媒体文件列表
      */
@@ -142,7 +142,7 @@ export class MediaController{
             order = [['id','desc']]
         }
 
-        const { rows, count } = await Media.findAndCountAll({
+        const { rows, count } = await VideoFile.findAndCountAll({
             offset: page * limit - limit,
             limit: limit,
             where,
@@ -160,7 +160,7 @@ export class MediaController{
     static async Update (ctx: Router.RouterContext) {
         // const id = parseNumber(ctx.request.body.id,0)
         const { id,fileName } = ctx.request.body
-        const mediaInfo = await Media.findByPk(id)
+        const mediaInfo = await VideoFile.findByPk(id)
         if(mediaInfo == null ){
             ctx.status = 400
             ctx.body = {'message':'ID不存在'}
@@ -183,7 +183,7 @@ export class MediaController{
      */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
-        const mediaInfo = await Media.findByPk(Number(id))
+        const mediaInfo = await VideoFile.findByPk(Number(id))
         if(mediaInfo === null){
             ctx.status = 400, ctx.body = {'message':'数据不存在'}
             return
@@ -196,41 +196,41 @@ export class MediaController{
 
 }
 
-/**
- * 切片管理列表
- */
-export class MediaTsController{
-    static async List (ctx: Router.RouterContext){
-        const page = Number(ctx.request.query.page)
-        const limit = Number(ctx.request.query.limit) 
-        const { rows, count } = await MediaTs.findAndCountAll({
-            offset: page * limit - limit,
-            limit: limit,
-        })
-        ctx.body = {
-            data: rows,
-            total: count
-        }
-    }
-}
+// /**
+//  * 切片管理列表
+//  */
+// export class MediaTsController{
+//     static async List (ctx: Router.RouterContext){
+//         const page = Number(ctx.request.query.page)
+//         const limit = Number(ctx.request.query.limit) 
+//         const { rows, count } = await MediaTs.findAndCountAll({
+//             offset: page * limit - limit,
+//             limit: limit,
+//         })
+//         ctx.body = {
+//             data: rows,
+//             total: count
+//         }
+//     }
+// }
 
-/**
- * 提交定时任务
- */
-export class MediaTaskController{
-    static async ffmpegSubmit(ctx:Router.RouterContext){
-        // const id = Number(ctx.request.body.id)
-        // const data = await Media.findByPk(id)
-        // if (data == null){
-        //     return
-        // }
-        // data.hlsPath = `data/${data.id}/hls/index.m3u8`
-        // data.hlsKey = randomstr(16)
-        // data.save()
-        // const queue = await ffmpegQueue.add(data)
-        // ctx.body = {
-        //     jobId: queue.id,
-        //     message: `转码任务为-> ${queue.id}`
-        // }
-    }
-}
+// /**
+//  * 提交定时任务
+//  */
+// export class MediaTaskController{
+//     static async ffmpegSubmit(ctx:Router.RouterContext){
+//         // const id = Number(ctx.request.body.id)
+//         // const data = await VideoFile.findByPk(id)
+//         // if (data == null){
+//         //     return
+//         // }
+//         // data.hlsPath = `data/${data.id}/hls/index.m3u8`
+//         // data.hlsKey = randomstr(16)
+//         // data.save()
+//         // const queue = await ffmpegQueue.add(data)
+//         // ctx.body = {
+//         //     jobId: queue.id,
+//         //     message: `转码任务为-> ${queue.id}`
+//         // }
+//     }
+// }

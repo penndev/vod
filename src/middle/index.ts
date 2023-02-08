@@ -3,7 +3,7 @@ import { Next } from 'koa'
 import { koaBody } from 'koa-body'
 import Jwt from 'jsonwebtoken'
 import config from '../config/index.js'
-import { AdminAccesslog, Admin, AdminRole } from '../orm/model.js'
+import { AdminAccesslog, AdminUser, AdminRole } from '../orm/model.js'
 import { serverAdapter } from '../queue/index.js'
 import { createReadStream, existsSync, statSync } from 'fs'
 import mime from 'mime'
@@ -54,11 +54,11 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         ctx.status = 401, ctx.body = {'message':'请进行用户验证'}
         return
     }
-    let adminInfo:Admin|null = null
+    let adminInfo:AdminUser|null = null
     //进行用户认证以及登录权限
     try {
         const payload = Jwt.verify(token, config.secret)
-        adminInfo = await Admin.findByPk(Number(payload.sub))
+        adminInfo = await AdminUser.findByPk(Number(payload.sub))
         if(adminInfo === null){
             ctx.status = 401, ctx.body = {'message':'用户失效'}
             return
