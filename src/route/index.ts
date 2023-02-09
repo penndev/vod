@@ -2,7 +2,7 @@ import Router from "@koa/router"
 
 import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
-import { VideoFileController, UploadMedia } from "./media.js"
+import { VideoFileController, UploadMedia, VideoTranscodeConroller } from "./video.js"
 // import { taskHlsQuery, taskHlsSubmit, taskMpegtsSubmit } from "./task.js"
 
 const router = new Router({ prefix: '/api' })
@@ -43,12 +43,15 @@ router.use(auth)
  * 处理媒体类接口
  */
 {
+    // 原始文件管理
     router.post('/video/upload/part', UploadMedia.Before) 
     router.put('/video/upload/part', UploadMedia.Part)
-
     router.get('/video/file', VideoFileController.List)
     router.put('/video/file', VideoFileController.Update)
     router.delete('/video/file', VideoFileController.Delete)
+
+    // 转码参数配置
+    router.post('/video/transcode', VideoTranscodeConroller.Add)
 
     // 媒体切片
     // router.get('/media/mpegts/list', MediaTsController.List)

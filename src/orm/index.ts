@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
-import { AdminAccesslog, AdminUser, AdminRole, VideoFile } from './model.js'
+import { AdminAccesslog, AdminUser, AdminRole, VideoFile, VideoTranscode } from './model.js'
 
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
@@ -18,15 +18,14 @@ AdminUser.initial({sequelize, underscored: true })
 AdminRole.initial({sequelize, underscored: true })
 AdminAccesslog.initial({sequelize, underscored: true })
 
-
-
-
-// MediaTs.initial({sequelize, underscored: true })
-
 // 表关联
 // Admin.belongsTo(AdminRole,{
 //     constraints: false,
 // })
+
+
+VideoFile.initial({sequelize, underscored: true })
+VideoTranscode.initial({sequelize, underscored: true })
 
 // 表结构同步
 if(process.env.NODE_ENV == "dev"){
@@ -38,4 +37,5 @@ export {
     AdminRole,
     AdminAccesslog,
     VideoFile,
+    VideoTranscode
 }

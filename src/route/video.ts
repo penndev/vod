@@ -1,5 +1,5 @@
 import Router from "@koa/router"
-import { VideoFile } from "../orm/model.js"
+import { VideoFile, VideoTranscode } from "../orm/model.js"
 import { File } from 'formidable'
 import { readFileSync, unlink, writeFileSync } from "fs"
 import ffprobeQueue from "../queue/ffprobe.js"
@@ -143,10 +143,10 @@ export class VideoFileController{
         }
 
         const { rows, count } = await VideoFile.findAndCountAll({
-            offset: page * limit - limit,
-            limit: limit,
-            where,
-            order,
+            // offset: page * limit - limit,
+            // limit: limit,
+            // where,
+            // order,
         })
         ctx.body = {
             data: rows,
@@ -194,6 +194,53 @@ export class VideoFileController{
         return
     }
 
+}
+
+/**
+ * 转码参数管理
+ */
+export class VideoTranscodeConroller{
+    /**
+     * 媒体文件列表
+     */
+    static async Add (ctx: Router.RouterContext) {
+        let {
+            name,
+            
+            vcodec,
+            vwidth,
+            vheight,
+            vcrf,
+            vfps,
+            vbitrate,
+
+            acodec,
+            abitrate,
+            asamplerate,
+            achannel,
+
+            command
+        } = ctx.request.body
+
+        const data = await VideoTranscode.create({
+            name,
+            vcodec,
+            vwidth,
+            vheight,
+            vcrf,
+            vfps,
+            vbitrate,
+            acodec,
+            abitrate,
+            asamplerate,
+            achannel,
+            command
+        })
+        
+        ctx.body = {
+            message: `${data.name}[${data.id}] 添加成功`
+        }
+    }
 }
 
 // /**
