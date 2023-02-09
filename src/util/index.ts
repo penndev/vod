@@ -55,7 +55,7 @@ export const networks = (host: string) => {
 }
 
 export const parseNumber = (value:any, defaultValue:number) => {
-    var num = parseInt(value);
+    const num = parseInt(value);
     if (isNaN(num)) {
       return defaultValue;
     }

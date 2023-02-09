@@ -204,7 +204,7 @@ export class VideoTranscodeConroller{
      * 媒体文件列表
      */
     static async Add (ctx: Router.RouterContext) {
-        let {
+        const {
             name,
             
             vcodec,

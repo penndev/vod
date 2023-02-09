@@ -31,7 +31,7 @@ export const log = async (ctx: Router.RouterContext, next: Next) => {
     try {
         await next();
     } catch (error) {
-        let date = new Date()
+        const date = new Date()
         console.error("\x1b[31m [%s] %s", date.toISOString(), error)
         const err = (error as Error)
         ctx.status = 500
