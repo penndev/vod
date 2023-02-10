@@ -143,10 +143,10 @@ export class VideoFileController{
         }
 
         const { rows, count } = await VideoFile.findAndCountAll({
-            // offset: page * limit - limit,
-            // limit: limit,
-            // where,
-            // order,
+            offset: page * limit - limit,
+            limit: limit,
+            where,
+            order,
         })
         ctx.body = {
             data: rows,
@@ -201,12 +201,13 @@ export class VideoFileController{
  */
 export class VideoTranscodeConroller{
     /**
-     * 媒体文件列表
+     * 新增转码配置
      */
     static async Add (ctx: Router.RouterContext) {
         const {
             name,
-            
+            format,
+
             vcodec,
             vwidth,
             vheight,
@@ -224,6 +225,7 @@ export class VideoTranscodeConroller{
 
         const data = await VideoTranscode.create({
             name,
+            format,
             vcodec,
             vwidth,
             vheight,
@@ -241,6 +243,97 @@ export class VideoTranscodeConroller{
             message: `${data.name}[${data.id}] 添加成功`
         }
     }
+    /**
+     * 转码配置列表
+     */
+    static async List (ctx: Router.RouterContext) {
+        const query = ctx.request.query
+        const page = parseNumber(query.page,1)
+        const limit = parseNumber(query.limit,20)        
+        
+        const where: WhereOptions = {} 
+        if(query.name){
+            where.name = {[Op.like]: '%' + query.name + '%'}
+        }
+
+        let order: Order = []
+        if(query.order == "-id"){
+            order = [['id','desc']]
+        }
+
+        const { rows, count } = await VideoTranscode.findAndCountAll({
+            offset: page * limit - limit,
+            limit: limit,
+            where,
+            order,
+        })
+        ctx.body = {
+            data: rows,
+            total: count
+        }
+    }
+
+    /**
+     * 修改文件内容
+     */
+    static async Update (ctx: Router.RouterContext) {
+        const { 
+            id,  
+            name,
+            format,
+            vcodec,
+            // vwidth,
+            // vheight,
+            // vcrf,
+            // vfps,
+            // vbitrate,
+            acodec,
+            // abitrate,
+            // asamplerate,
+            // achannel,
+            // command 
+        } = ctx.request.body
+        const vtinfo = await VideoTranscode.findByPk(id)
+        if(vtinfo == null ){
+            ctx.status = 400
+            ctx.body = {'message':'ID不存在'}
+            return
+        }
+
+        if(vtinfo.name != name){
+            vtinfo.name = name
+        }
+        if(vtinfo.format != format){
+            vtinfo.format = format
+        }
+        if(vtinfo.vcodec != vcodec){
+            vtinfo.vcodec = vcodec
+        }
+        if(vtinfo.acodec != acodec){
+            vtinfo.acodec = acodec
+        }
+
+        vtinfo.save()
+        ctx.body = {'message':'修改完成'}
+    }    
+
+
+    /**
+     * 删除媒体文件
+     */
+    static async Delete (ctx: Router.RouterContext) {
+        const id = ctx.request.query.id
+        const vfInfo = await VideoTranscode.findByPk(Number(id))
+        if(vfInfo === null){
+            ctx.status = 400, ctx.body = {'message':'数据不存在'}
+            return
+        }
+        // 是否删除文件
+        vfInfo.destroy()
+        ctx.status = 200, ctx.body = {'message': vfInfo.name + '删除成功'}
+        return
+    }
+
 }
 
 // /**

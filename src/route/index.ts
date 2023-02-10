@@ -52,16 +52,14 @@ router.use(auth)
 
     // 转码参数配置
     router.post('/video/transcode', VideoTranscodeConroller.Add)
+    router.get('/video/transcode', VideoTranscodeConroller.List)
+    router.put('/video/transcode', VideoTranscodeConroller.Update)
+    router.delete('/video/transcode', VideoTranscodeConroller.Delete)
+    
+    // 任务管理配置
+    
 
-    // 媒体切片
-    // router.get('/media/mpegts/list', MediaTsController.List)
 
-    // 队列文件校验
-    // router.get('/job/hls/query', taskHlsQuery)
-    // router.post('/job/hls/submit', taskHlsSubmit)
-    // // 队列视频转码
-    // // router.get('/job/mpegts/query', taskMpegtsQuery)
-    // router.post('/job/mpegts/submit', taskMpegtsSubmit)
 }
 
 export default router.routes()

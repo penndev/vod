@@ -222,6 +222,8 @@ class VideoTranscode extends Model {
     declare updatedAt: Date;
 
     declare name:string
+    declare format:string
+    
     declare vcodec:string
     declare vwidth: number
     declare vheight: number
@@ -242,6 +244,11 @@ class VideoTranscode extends Model {
                 type: DataTypes.STRING,
                 allowNull: false,
                 comment: '编码器名称'
+            },
+            format: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                comment: '文件格式名称'
             },
             vcodec: {
                 type: DataTypes.STRING,
