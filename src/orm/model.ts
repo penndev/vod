@@ -44,7 +44,6 @@ class AdminUser extends Model {
     }
 }
 
-
 /**
  * 角色列表
  */
@@ -157,7 +156,7 @@ class VideoFile extends Model {
                 status: {
                     type: DataTypes.TINYINT,
                     defaultValue: 0,
-                    comment: '-2转码错误|-1文件错误|0|1文件分析完成|转码成功'
+                    comment: '-1文件错误|0|1文件分析完成'
                 },
                 fileName: {
                     type: DataTypes.STRING,
@@ -218,8 +217,8 @@ class VideoFile extends Model {
 
 class VideoTranscode extends Model {
     declare id: number
-    declare createdAt: Date;
-    declare updatedAt: Date;
+    declare createdAt: Date
+    declare updatedAt: Date
 
     declare name:string
     declare format:string
@@ -309,10 +308,61 @@ class VideoTranscode extends Model {
     }
 }
 
+class VideoTask extends Model {
+    declare id: number
+    declare createdAt: Date
+    declare updatedAt: Date
+
+    declare fileId: number
+    declare transcodeId: number
+    declare options: string
+
+    declare status: number
+
+    declare outFile: string
+    declare outSize: number
+    
+    public static initial(options: InitOptions)  {
+        this.init({
+            fileId: {
+                type: DataTypes.INTEGER.UNSIGNED,
+                allowNull: false,
+                comment: '关联文件'
+            },
+            transcodeId: {
+                type: DataTypes.INTEGER.UNSIGNED,
+                allowNull: false,
+                comment: '关联编码器'
+            },
+            options: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                comment: 'ffmpeg 参数'
+            },
+            status: {
+                type: DataTypes.INTEGER.UNSIGNED,
+                defaultValue: 0,
+                comment: '0转码中 | 1成功 | 2失败'
+            },
+            outFile: {
+                type: DataTypes.STRING,
+                allowNull: true,
+                comment: '输出文件路径'
+            },
+            outSize: {
+                type: DataTypes.INTEGER.UNSIGNED,
+                defaultValue: 0,
+            },
+        },options)
+    }
+
+}
+
 export {
     AdminUser,
     AdminRole,
     AdminAccesslog,
     VideoFile,
     VideoTranscode,
+    VideoTask,
 }

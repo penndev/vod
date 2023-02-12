@@ -1,12 +1,16 @@
 import Router from "@koa/router"
-import { VideoFile, VideoTranscode } from "../orm/model.js"
-import { File } from 'formidable'
-import { readFileSync, unlink, writeFileSync } from "fs"
-import ffprobeQueue from "../queue/ffprobe.js"
-import { ismkdir, parseNumber } from "../util/index.js"
 import redis from "../redis/index.js"
 import config from "../config/index.js"
 import { WhereOptions, Op, Order } from 'sequelize'
+
+import { VideoFile, VideoTranscode } from "../orm/index.js"
+import { File } from 'formidable'
+import { readFileSync, unlink, writeFileSync } from "fs"
+import { ffprobeQueue,ffmpegQueue, ffmpegInput } from "../queue/index.js"
+import { ismkdir, parseNumber } from "../util/index.js"
+import { VideoTask } from "../orm/model.js"
+import { relative } from "path"
+
 
 /**上传媒体文件限制大小 */
 const urate = 5 * 1048576
@@ -336,41 +340,52 @@ export class VideoTranscodeConroller{
 
 }
 
-// /**
-//  * 切片管理列表
-//  */
-// export class MediaTsController{
-//     static async List (ctx: Router.RouterContext){
-//         const page = Number(ctx.request.query.page)
-//         const limit = Number(ctx.request.query.limit) 
-//         const { rows, count } = await MediaTs.findAndCountAll({
-//             offset: page * limit - limit,
-//             limit: limit,
-//         })
-//         ctx.body = {
-//             data: rows,
-//             total: count
-//         }
-//     }
-// }
+/**
+ * 提交转码任务管理
+ */
+export class VideoTaskController{
+    static async Add(ctx:Router.RouterContext){
+        const { fileId, transcodeId, command, } = ctx.request.body
+        const file = await VideoFile.findByPk(fileId)
+        if(!file || file.status < 1){
+            ctx.status = 400, ctx.body={"message":"文件不存在,或状态错误"}
+            return 
+        }
+        const transcode = await VideoTranscode.findByPk(transcodeId)
+        if(!transcode){
+            ctx.status = 400, ctx.body={"message":"编码器不存在"}
+            return 
+        }
 
-// /**
-//  * 提交定时任务
-//  */
-// export class MediaTaskController{
-//     static async ffmpegSubmit(ctx:Router.RouterContext){
-//         // const id = Number(ctx.request.body.id)
-//         // const data = await VideoFile.findByPk(id)
-//         // if (data == null){
-//         //     return
-//         // }
-//         // data.hlsPath = `data/${data.id}/hls/index.m3u8`
-//         // data.hlsKey = randomstr(16)
-//         // data.save()
-//         // const queue = await ffmpegQueue.add(data)
-//         // ctx.body = {
-//         //     jobId: queue.id,
-//         //     message: `转码任务为-> ${queue.id}`
-//         // }
-//     }
-// }
+        // 处理其他更多的参数。
+        const options:string[] = [`-vcodec ${transcode.vcodec}`,`-acodec ${transcode.acodec}`]
+        // 编码器参数配置+覆盖。
+        const mergeOptions = (transcode.command ?? '' ) + ";" + ( command ?? '' ) 
+        for(let item of mergeOptions.split(";")){
+            const option = item.trim()
+            if(option) options.push(option)
+        }
+
+        // 新建表
+        const task = await VideoTask.create({
+            fileId,
+            transcodeId,
+            options: JSON.stringify(options),
+            status:0,
+        })
+        task.outFile =  relative(file.filePath,`./${task.id}/index.${transcode.format}`) 
+        await task.save()
+
+        const finput:ffmpegInput = {
+            inputFile: file?.filePath,
+            options,
+            outPutFile: task.outFile,
+            taskId: task.id,
+        }
+
+        ctx.body = {
+            "message": "提交完成",
+            data: await ffmpegQueue.add(finput)
+        }
+    }
+}

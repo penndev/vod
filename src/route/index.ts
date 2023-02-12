@@ -1,20 +1,16 @@
 import Router from "@koa/router"
-
 import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
-import { VideoFileController, UploadMedia, VideoTranscodeConroller } from "./video.js"
-// import { taskHlsQuery, taskHlsSubmit, taskMpegtsSubmit } from "./task.js"
+import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController } from "./video.js"
+
 
 const router = new Router({ prefix: '/api' })
-
 /**
  * 允许post参数与文件上传
  */
 router.use(body)
-
 router.get('/captcha', captcha) // 全局验证码
 router.post('/login', login)    // 管理员登录
- 
 
 /**
  * 下面所有的接口都需要登录
@@ -57,8 +53,7 @@ router.use(auth)
     router.delete('/video/transcode', VideoTranscodeConroller.Delete)
     
     // 任务管理配置
-    
-
+    router.post('/video/task', VideoTaskController.Add)
 
 }
 

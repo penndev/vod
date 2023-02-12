@@ -4,12 +4,15 @@ import { readFileSync, writeFileSync } from 'fs'
 import config from '../config/index.js'
 import { ismkdir } from '../util/index.js'
 import { VideoFile } from '../orm/index.js'
+import { ffmpegInput } from './interface.js'
 
 const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri, {prefix:`bull:${config.node}`})
 
-// @param job.data  Media 序列化json数据
-const callBack:Queue.ProcessCallbackFunction<VideoFile> = async(job,done)=>{
-    // const jobData =  job.data as Media
+
+const callBack:Queue.ProcessCallbackFunction<ffmpegInput> = async(job,done)=>{
+    const jobData =  job.data as ffmpegInput
+    console.log("ffmpegInput ==================================================>",jobData)
+    done()
     // await ismkdir(jobData.hlsPath)
     // const keyfile = jobData.hlsPath.replace("index.m3u8", "index.key")
 
