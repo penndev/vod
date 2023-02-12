@@ -6,10 +6,10 @@ import { WhereOptions, Op, Order } from 'sequelize'
 import { VideoFile, VideoTranscode } from "../orm/index.js"
 import { File } from 'formidable'
 import { readFileSync, unlink, writeFileSync } from "fs"
-import { ffprobeQueue,ffmpegQueue, ffmpegInput } from "../queue/index.js"
+import { ffprobeQueue, ffmpegQueue, ffmpegInput } from "../queue/index.js"
 import { ismkdir, parseNumber } from "../util/index.js"
 import { VideoTask } from "../orm/model.js"
-import { relative } from "path"
+import { dirname, join } from "path/posix"
 
 
 /**上传媒体文件限制大小 */
@@ -344,6 +344,9 @@ export class VideoTranscodeConroller{
  * 提交转码任务管理
  */
 export class VideoTaskController{
+    /**
+     * 新增转码任务
+     */
     static async Add(ctx:Router.RouterContext){
         const { fileId, transcodeId, command, } = ctx.request.body
         const file = await VideoFile.findByPk(fileId)
@@ -370,10 +373,10 @@ export class VideoTaskController{
         const task = await VideoTask.create({
             fileId,
             transcodeId,
-            options: JSON.stringify(options),
+            options: JSON.stringify(options, null, 2),
             status:0,
         })
-        task.outFile =  relative(file.filePath,`./${task.id}/index.${transcode.format}`) 
+        task.outFile = join(dirname(file.filePath),`${task.id}/index.${transcode.format}`)
         await task.save()
 
         const finput:ffmpegInput = {
@@ -387,5 +390,42 @@ export class VideoTaskController{
             "message": "提交完成",
             data: await ffmpegQueue.add(finput)
         }
+    }
+
+    /**
+     * 转码配置列表
+     */
+    static async List (ctx: Router.RouterContext) {
+        const query = ctx.request.query
+        const page = parseNumber(query.page,1)
+        const limit = parseNumber(query.limit,20)        
+        
+        const where: WhereOptions = {} 
+        if(query.name){
+            where.name = {[Op.like]: '%' + query.name + '%'}
+        }
+
+        let order: Order = []
+        if(query.order == "-id"){
+            order = [['id','desc']]
+        }
+
+        const { rows, count } = await VideoTask.findAndCountAll({
+            offset: page * limit - limit,
+            limit: limit,
+            where,
+            order,
+        })
+        ctx.body = {
+            data: rows,
+            total: count
+        }
+    }
+
+
+    // 查询任务进度
+    static async Progress(ctx:Router.RouterContext){
+        const job = await ffmpegQueue.getJob(ctx.query.id as string)
+        ctx.body = job
     }
 }

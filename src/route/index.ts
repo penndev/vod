@@ -54,6 +54,8 @@ router.use(auth)
     
     // 任务管理配置
     router.post('/video/task', VideoTaskController.Add)
+    router.get('/video/task', VideoTaskController.List)
+    router.get('/video/task/progress', VideoTaskController.Progress)
 
 }
 
