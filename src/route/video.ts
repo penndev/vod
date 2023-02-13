@@ -371,8 +371,8 @@ export class VideoTaskController{
 
         // 新建表
         const task = await VideoTask.create({
-            fileId,
-            transcodeId,
+            videoFileId:fileId,
+            videoTranscodeId:transcodeId,
             options: JSON.stringify(options, null, 2),
             status:0,
         })
@@ -415,6 +415,10 @@ export class VideoTaskController{
             limit: limit,
             where,
             order,
+            include:[
+                { model: VideoFile },
+                { model: VideoTranscode }
+            ]
         })
         ctx.body = {
             data: rows,

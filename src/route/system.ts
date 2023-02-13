@@ -6,7 +6,7 @@ import { AdminUser, AdminAccesslog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
-import { Order, WhereOptions, Op } from 'sequelize'
+import { Order, WhereOptions, Op, Model } from 'sequelize'
 
 /**
  * 获取系统验证码
@@ -48,7 +48,7 @@ export const login = async (ctx: Router.RouterContext) => {
                 email: username,
                 passwd: await Bcrypt.hash(password,saltRound),
                 status: 1,
-                roleId: 0,
+                adminRoleId: 0,
                 nickname: 'admin',
             })
         } else {
@@ -95,19 +95,10 @@ export class AdminController{
             offset: page * limit - limit,
             limit: limit,
             where: whereArr,
+            include: [
+                {model: AdminRole}
+            ]
         })
-        for(const i in rows){
-            if (rows[i].roleId == 0){
-                rows[i].setDataValue('roleName','超级管理员')
-            }else{
-                const roleInfo = await AdminRole.findByPk(rows[i].roleId,{attributes:['name']})
-                if(roleInfo == null){
-                    rows[i].setDataValue('roleName','权限错误')
-                }else{
-                    rows[i].setDataValue('roleName',roleInfo.name)
-                }
-            }
-        }
         ctx.body = {
             data: rows,
             total: count
@@ -160,7 +151,7 @@ export class AdminController{
             passwd: await Bcrypt.hash(passwd,saltRound),
             status,
             nickname,
-            roleId,
+            adminRoleId:roleId,
         })
         ctx.status = 200, ctx.body = {'message':'创建成功！'}
         return
@@ -212,7 +203,7 @@ export class AdminController{
         }
 
         const { rows, count } = await AdminAccesslog.findAndCountAll({
-            offset, limit, where, order
+            offset, limit, where, order,include:[{model:AdminUser}]
         })
         ctx.body = {
             data: rows,

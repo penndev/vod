@@ -78,8 +78,8 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     // console.log("----------------------------------------------------") 
 
     //判断是否需要进行接口鉴权
-    if(adminInfo.roleId != 0){
-        const roleInfo = await AdminRole.findByPk(adminInfo.roleId)
+    if(adminInfo.adminRoleId != 0){
+        const roleInfo = await AdminRole.findByPk(adminInfo.adminRoleId)
         if(roleInfo == null){
             ctx.status = 403, ctx.body = {messge:'权限匹配失败'}
             return 
@@ -98,12 +98,16 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         }
     }
     await next()
+    const param = {
+        query:ctx.request.query, 
+        body:ctx.request.body
+    }
     AdminAccesslog.create({
-        admin: adminInfo.id,
+        adminUserId: adminInfo.id,
         path:ctx.URL.pathname,
         method: ctx.request.method,
         ip:ctx.request.ip,
-        payload: JSON.stringify(ctx.request.query) + JSON.stringify(ctx.request.body),
+        payload: JSON.stringify(param,null,2),
         status: ctx.response.status
     })
 }

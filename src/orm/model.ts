@@ -10,8 +10,9 @@ class AdminUser extends Model {
     declare nickname: string
     declare email: string
     declare passwd: string
-    declare roleId: number
     declare status: number
+
+    declare adminRoleId: number
         
     // 结构体
     static initial(options: InitOptions) {
@@ -34,7 +35,7 @@ class AdminUser extends Model {
                     defaultValue: 0,
                     comment: '0禁止登录 | 1允许登录'
                 },
-                roleId: {
+                adminRoleId: {
                     type: DataTypes.INTEGER.UNSIGNED,
                     allowNull: false,
                     comment: '0超级管理员'
@@ -89,7 +90,7 @@ class AdminAccesslog extends Model {
     declare createdAt: Date;
     declare updatedAt: Date;
 
-    declare admin: number // request auth user
+    declare adminUserId: number // request auth user
     declare method: string // http request method
     declare path: string // http request url
     declare payload: string //requets param or body
@@ -98,7 +99,7 @@ class AdminAccesslog extends Model {
     public static initial(options: InitOptions)  {
         this.init(
             {
-                admin: {
+                adminUserId: {
                     type: DataTypes.INTEGER.UNSIGNED,
                 },
                 ip:{
@@ -313,10 +314,10 @@ class VideoTask extends Model {
     declare createdAt: Date
     declare updatedAt: Date
 
-    declare fileId: number
-    declare transcodeId: number
-    declare options: string
+    declare videoFileId: number
+    declare videoTranscodeId: number
 
+    declare options: string
     declare status: number
 
     declare outFile: string
@@ -324,12 +325,12 @@ class VideoTask extends Model {
     
     public static initial(options: InitOptions)  {
         this.init({
-            fileId: {
+            videoFileId: {
                 type: DataTypes.INTEGER.UNSIGNED,
                 allowNull: false,
                 comment: '关联文件'
             },
-            transcodeId: {
+            videoTranscodeId: {
                 type: DataTypes.INTEGER.UNSIGNED,
                 allowNull: false,
                 comment: '关联编码器'

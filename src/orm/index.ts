@@ -2,6 +2,10 @@ import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
 import { AdminAccesslog, AdminUser, AdminRole, VideoFile, VideoTranscode, VideoTask } from './model.js'
 
+/**
+ * 数据库连接实例
+ * 并对连通性进行测试
+ */
 const sequelize = new Sequelize(config.dburi,{
     timezone: '+08:00',
     dialectOptions: {
@@ -9,24 +13,34 @@ const sequelize = new Sequelize(config.dburi,{
         typeCast: true
     }
 })
-
-// 数据库链接
 await sequelize.authenticate()
 
-// 表注册
+/**
+ * 系统管理默认表
+ * @param AdminUser 系统管理员
+ * @param AdminRole 系统权限
+ * @param AdminAccesslog 系统访问日志表
+ */
 AdminUser.initial({sequelize, underscored: true })
 AdminRole.initial({sequelize, underscored: true })
 AdminAccesslog.initial({sequelize, underscored: true })
+// *** 处理关联联系
+AdminUser.belongsTo(AdminRole,{ constraints: false, })
+AdminAccesslog.belongsTo(AdminUser,{ constraints: false, })
 
-// 表关联
-// Admin.belongsTo(AdminRole,{
-//     constraints: false,
-// })
-
-
+/**
+ * 视频管理默认表
+ * @param VideoFile 视频源文件
+ * @param VideoTranscode ffmpeg编码器
+ * @param VideoTask 视频转码列表
+ */
 VideoFile.initial({sequelize, underscored: true })
 VideoTranscode.initial({sequelize, underscored: true })
 VideoTask.initial({sequelize, underscored: true })
+// *** 处理关联联系
+VideoTask.belongsTo(VideoFile,{ constraints: false, })
+VideoTask.belongsTo(VideoTranscode,{ constraints: false, })
+
 
 // 表结构同步
 if(process.env.NODE_ENV == "dev"){
