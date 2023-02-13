@@ -3,12 +3,11 @@ import redis from "../redis/index.js"
 import config from "../config/index.js"
 import { WhereOptions, Op, Order } from 'sequelize'
 
-import { VideoFile, VideoTranscode } from "../orm/index.js"
+import { VideoFile, VideoTranscode, VideoTask } from "../orm/index.js"
 import { File } from 'formidable'
-import { readFileSync, unlink, writeFileSync } from "fs"
+import { readFileSync, unlinkSync, writeFileSync } from "fs"
 import { ffprobeQueue, ffmpegQueue, ffmpegInput } from "../queue/index.js"
 import { ismkdir, parseNumber } from "../util/index.js"
-import { VideoTask } from "../orm/model.js"
 import { dirname, join } from "path/posix"
 
 
@@ -63,7 +62,7 @@ export class UploadMedia{
             filePath: `data/${config.node}/media/${data.fileMd5.slice(0,3)}/${data.fileMd5}/${data.fileName}`
         })
         //清理掉历史遗留文件
-        unlink(data.filePath,(e)=>{})
+        unlinkSync(data.filePath)
         const partData: uploadPart = {
             fid: data.id,
             fpath: data.filePath,
@@ -364,7 +363,7 @@ export class VideoTaskController{
         const options:string[] = [`-vcodec ${transcode.vcodec}`,`-acodec ${transcode.acodec}`]
         // 编码器参数配置+覆盖。
         const mergeOptions = (transcode.command ?? '' ) + ";" + ( command ?? '' ) 
-        for(let item of mergeOptions.split(";")){
+        for(const item of mergeOptions.split(";")){
             const option = item.trim()
             if(option) options.push(option)
         }

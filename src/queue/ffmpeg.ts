@@ -1,9 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
-import { readFileSync, writeFileSync } from 'fs'
 import config from '../config/index.js'
 import { ismkdir } from '../util/index.js'
-import { VideoFile } from '../orm/index.js'
 import { ffmpegInput } from './interface.js'
 import { VideoTask } from '../orm/model.js'
 

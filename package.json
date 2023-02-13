@@ -4,7 +4,7 @@
     "dev": "set NODE_ENV=dev&& nodemon --watch src -e ts,js --exec \"ts-node-esm src/index.ts\"",
     "serve": "ts-node-esm src/index.ts",
     "queue": "set NODE_ENV=queue&& ts-node-esm src/queue/index.ts",
-    "lint": "eslint . --fix",
+    "lint": "eslint ./src --fix",
     "test": "ts-node-esm test/index.ts"
   },
   "devDependencies": {

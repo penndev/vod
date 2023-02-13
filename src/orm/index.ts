@@ -42,7 +42,9 @@ VideoTask.belongsTo(VideoFile,{ constraints: false, })
 VideoTask.belongsTo(VideoTranscode,{ constraints: false, })
 
 
-// 表结构同步
+/**
+ * 开发环境自动同步表结构，并进行打印。
+ */
 if(process.env.NODE_ENV == "dev"){
     await sequelize.sync({ alter: true })
 }
@@ -52,5 +54,6 @@ export {
     AdminRole,
     AdminAccesslog,
     VideoFile,
-    VideoTranscode
+    VideoTranscode,
+    VideoTask
 }

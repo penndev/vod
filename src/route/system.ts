@@ -6,7 +6,7 @@ import { AdminUser, AdminAccesslog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import Config from '../config/index.js'
 import Bcrypt from 'bcrypt'
-import { Order, WhereOptions, Op, Model } from 'sequelize'
+import { Order, WhereOptions, Op, } from 'sequelize'
 
 /**
  * 获取系统验证码
