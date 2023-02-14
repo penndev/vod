@@ -294,7 +294,7 @@ export class VideoTranscodeConroller{
             // abitrate,
             // asamplerate,
             // achannel,
-            // command 
+            command
         } = ctx.request.body
         const vtinfo = await VideoTranscode.findByPk(id)
         if(vtinfo == null ){
@@ -314,6 +314,9 @@ export class VideoTranscodeConroller{
         }
         if(vtinfo.acodec != acodec){
             vtinfo.acodec = acodec
+        }
+        if(vtinfo.command != command){
+            vtinfo.command = command
         }
 
         vtinfo.save()
@@ -377,6 +380,7 @@ export class VideoTaskController{
         })
         task.outFile = join(dirname(file.filePath),`${task.id}/index.${transcode.format}`)
         await task.save()
+        await ismkdir(task.outFile)
 
         const finput:ffmpegInput = {
             inputFile: file?.filePath,

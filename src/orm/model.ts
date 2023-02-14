@@ -341,9 +341,9 @@ class VideoTask extends Model {
                 comment: 'ffmpeg 参数'
             },
             status: {
-                type: DataTypes.INTEGER.UNSIGNED,
+                type: DataTypes.INTEGER,
                 defaultValue: 0,
-                comment: '0转码中 | 1成功 | 2失败'
+                comment: '0转码中 | 1成功'
             },
             outFile: {
                 type: DataTypes.STRING,

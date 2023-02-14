@@ -117,11 +117,11 @@ export const body = koaBody({multipart:true})
 
 /**bull koa adapter面板 */
 export const bull = (path:string)=> {
-    return  serverAdapter.setBasePath(path).registerPlugin()
+    return serverAdapter.setBasePath(path).registerPlugin()
 }
 
 export const mount = (u:string,d:string) => {
-    return (ctx: Router.RouterContext, next: Next)=>{
+    return async(ctx: Router.RouterContext, next: Next)=>{
         if(ctx.request.method === "GET" && ctx.URL.pathname.startsWith(u)){
             const fspath = decodeURIComponent(ctx.URL.pathname.replace(RegExp('^'+u), d))
             if(existsSync(fspath)){ //文件存在
@@ -152,6 +152,6 @@ export const mount = (u:string,d:string) => {
                 }
             }
         }
-        next()        
+        await next()
     }
 }
