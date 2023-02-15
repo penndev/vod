@@ -5,7 +5,7 @@ import { WhereOptions, Op, Order } from 'sequelize'
 
 import { VideoFile, VideoTranscode, VideoTask } from "../orm/index.js"
 import { File } from 'formidable'
-import { readFileSync } from "fs"
+import { readFileSync, writeFileSync } from "fs"
 import { ffprobeQueue, ffmpegQueue, ffmpegInput } from "../queue/index.js"
 import { ismkdir, isunlink, parseNumber } from "../util/index.js"
 import { dirname, join } from "path/posix"
