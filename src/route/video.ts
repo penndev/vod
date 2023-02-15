@@ -5,9 +5,9 @@ import { WhereOptions, Op, Order } from 'sequelize'
 
 import { VideoFile, VideoTranscode, VideoTask } from "../orm/index.js"
 import { File } from 'formidable'
-import { readFileSync, unlinkSync, writeFileSync } from "fs"
+import { readFileSync } from "fs"
 import { ffprobeQueue, ffmpegQueue, ffmpegInput } from "../queue/index.js"
-import { ismkdir, parseNumber } from "../util/index.js"
+import { ismkdir, isunlink, parseNumber } from "../util/index.js"
 import { dirname, join } from "path/posix"
 
 
@@ -62,7 +62,7 @@ export class UploadMedia{
             filePath: `data/${config.node}/media/${data.fileMd5.slice(0,3)}/${data.fileMd5}/${data.fileName}`
         })
         //清理掉历史遗留文件
-        unlinkSync(data.filePath)
+        await isunlink(data.filePath)
         const partData: uploadPart = {
             fid: data.id,
             fpath: data.filePath,
@@ -388,10 +388,11 @@ export class VideoTaskController{
             outPutFile: task.outFile,
             taskId: task.id,
         }
-
+        const jobInfo = await ffmpegQueue.add(finput)
+        redis.set(`task:progress:${task.id}`, jobInfo.id, {EX: 86400})
         ctx.body = {
             "message": "提交完成",
-            data: await ffmpegQueue.add(finput)
+            data: jobInfo
         }
     }
 
@@ -432,7 +433,19 @@ export class VideoTaskController{
 
     // 查询任务进度
     static async Progress(ctx:Router.RouterContext){
-        const job = await ffmpegQueue.getJob(ctx.query.id as string)
+        const task = await VideoTask.findByPk(parseNumber(ctx.query.id,0))
+        if ( task == null ) {
+            ctx.status = 400,ctx.body = {message:"任务不存在"}
+            return 
+        }
+
+        const jobId = await redis.get(`task:progress:${task.id}`)
+        if(jobId == null){
+            ctx.status = 400,ctx.body = {message:"任务过期"}
+            return 
+        }
+        const job = await ffmpegQueue.getJob(jobId)
+        // 判断job
         ctx.body = job
     }
 }

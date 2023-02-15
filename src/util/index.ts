@@ -1,4 +1,4 @@
-import { access, mkdirSync, constants, createReadStream } from 'fs'
+import { access, mkdirSync, constants, createReadStream, unlinkSync } from 'fs'
 import { parse } from 'path'
 import crypto from 'crypto'
 import os$3 from 'node:os'
@@ -29,14 +29,34 @@ export const sleep = (ms: number) => {
     });
 }
 
+/**
+ * 安全递归的创建文件夹
+ * @param filepath 
+ * @returns 
+ */
 export const ismkdir = (filepath: string) => {
     const dir = parse(filepath).dir;
     return new Promise((resolve) => {
-        access(dir, constants.F_OK, () => {
-            resolve(mkdirSync(dir,{recursive: true}))
+        access(dir, constants.F_OK, (err) => {
+            if(err != null) {
+                mkdirSync(dir,{recursive: true})
+            }
+            resolve(true)
         });
     })
 }
+
+export const isunlink = (filepath: string) => {
+    return new Promise((resolve, reject) => {
+        access(filepath, constants.F_OK, (err) => {
+            if(err == null){//文件存在
+                unlinkSync(filepath)
+            }
+            resolve(true)
+        });
+    })
+}
+
 
 export const randomstr = (length: number) => {
     const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
