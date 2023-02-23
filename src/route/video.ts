@@ -10,10 +10,6 @@ import { ffprobeQueue, ffmpegQueue, ffmpegInput } from "../queue/index.js"
 import { ismkdir, isunlink, parseNumber } from "../util/index.js"
 import { dirname, join } from "path/posix"
 
-
-/**上传媒体文件限制大小 */
-const urate = 5 * 1048576
-
 /**上传媒体文件 */
 interface uploadPart {
     fid: number; //存储文件ID
@@ -67,7 +63,7 @@ export class UploadMedia{
             fid: data.id,
             fpath: data.filePath,
             fsize: data.fileSize,
-            urate,
+            urate: 5 * 1048576,
             ucount: 0,
         }
         redis.SET(cacheKey,JSON.stringify(partData),{EX:86400})
@@ -449,3 +445,21 @@ export class VideoTaskController{
         ctx.body = job
     }
 }
+
+
+/**
+ * dashboard 仪表盘数据
+ */
+export const vodDashBoard = async(ctx:Router.RouterContext) => {
+    // 原始文件大小统计
+    const fileSize = await VideoFile.sum('fileSize')
+    const fileTotal = await VideoFile.count()
+    const transcodeTotal = await VideoTranscode.count()
+    const taskTotal = await VideoTask.count()
+    ctx.body = {
+        total1: fileSize,
+        total2: fileTotal,
+        total3: transcodeTotal,
+        total4: taskTotal
+    }
+} 

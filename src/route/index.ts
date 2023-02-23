@@ -1,7 +1,7 @@
 import Router from "@koa/router"
 import { auth, body } from "../middle/index.js"
 import { AdminController, captcha, login, RoleController } from "./system.js"
-import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController } from "./video.js"
+import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController, vodDashBoard } from "./video.js"
 
 
 const router = new Router({ prefix: '/api' })
@@ -16,6 +16,8 @@ router.post('/login', login)    // 管理员登录
  * 下面所有的接口都需要登录
  */
 router.use(auth)
+
+router.get('/dashboard', vodDashBoard)
 
 
 /**

@@ -1,4 +1,4 @@
-import { DataTypes, Model,InitOptions } from 'sequelize'
+import { DataTypes, Model, InitOptions } from 'sequelize'
 
 /**
  * 管理员列表
