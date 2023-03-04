@@ -87,7 +87,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         let denyIs = true
         const allowArr = JSON.parse(roleInfo.route)
         for(const allowItem of allowArr){
-            if(allowItem.path == ctx.URL.pathname){
+            if(allowItem.path == "/" || allowItem.path == ctx.URL.pathname){
                 denyIs = false
                 break
             }

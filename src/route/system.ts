@@ -46,7 +46,7 @@ export const login = async (ctx: Router.RouterContext) => {
             const saltRound = await Bcrypt.genSalt(10)
             adminInfo = await AdminUser.create({
                 email: username,
-                passwd: await Bcrypt.hash(password,saltRound),
+                passwd: await Bcrypt.hash(password, saltRound),
                 status: 1,
                 adminRoleId: 0,
                 nickname: 'admin',
@@ -56,18 +56,29 @@ export const login = async (ctx: Router.RouterContext) => {
             return
         }
     }
-    if (! await Bcrypt.compare(password,adminInfo.passwd)) {
+    if (! await Bcrypt.compare(password, adminInfo.passwd)) {
         ctx.status = 400, ctx.body = { message: '密码错误' }
         return
     }
+    let routes = '*'
+    if (adminInfo.adminRoleId > 0) {
+        const role = await AdminRole.findByPk(adminInfo.adminRoleId)
+        if (role === null) {
+            ctx.status = 400, ctx.body = { message: '密码错误' }
+            return
+        }
+        routes = role.menu
+    }
+
     ctx.body = {
-        'token': 
+        'token':
             Jwt.sign({
                 sub: adminInfo.id,
-                exp: Math.floor(Date.now()/1000) + 86400 * 7
+                exp: Math.floor(Date.now() / 1000) + 86400 * 7
             },
-            Config.secret
-        )
+                Config.secret
+            ),
+        'routes': routes
     }
 }
 
@@ -75,28 +86,28 @@ export const login = async (ctx: Router.RouterContext) => {
 /**
  * 管理员管理
  */
-export class AdminController{
-    
+export class AdminController {
+
     /**
      * 管理员列表
      */
-    static async List (ctx:Router.RouterContext)  {
+    static async List(ctx: Router.RouterContext) {
         const page = Number(ctx.request.query.page)
         const limit = Number(ctx.request.query.limit)
-        
-        const whereArr: WhereOptions = {} 
+
+        const whereArr: WhereOptions = {}
         const email = ctx.request.query.email
-        if(email !== undefined){
-            whereArr.email = {[Op.like]: '%' + email + '%'}
+        if (email !== undefined) {
+            whereArr.email = { [Op.like]: '%' + email + '%' }
         }
-    
+
         const { rows, count } = await AdminUser.findAndCountAll({
             attributes: { exclude: ['passwd'] },
             offset: page * limit - limit,
             limit: limit,
             where: whereArr,
             include: [
-                {model: AdminRole}
+                { model: AdminRole }
             ]
         })
         ctx.body = {
@@ -104,19 +115,19 @@ export class AdminController{
             total: count
         }
     }
-    
+
     /**
      * 管理员更新
      */
-    static async Update (ctx:Router.RouterContext) {
-        const {id, email, status, nickname, roleId } = ctx.request.body
+    static async Update(ctx: Router.RouterContext) {
+        const { id, email, status, nickname, roleId } = ctx.request.body
         const adminInfo = await AdminUser.findByPk(id)
-        if(adminInfo === null){
-            ctx.state = 400, ctx.body = {'message':'用户不存在！'}
+        if (adminInfo === null) {
+            ctx.state = 400, ctx.body = { 'message': '用户不存在！' }
             return
         }
-        if (roleId < 1){
-            ctx.state = 400, ctx.body = {'message':'权限错误！'}
+        if (roleId < 1) {
+            ctx.state = 400, ctx.body = { 'message': '权限错误！' }
             return
         }
         adminInfo.update({
@@ -125,85 +136,90 @@ export class AdminController{
             nickname,
             roleId
         })
-        ctx.state = 200, ctx.body = {'message':'操作完成'}
+        ctx.state = 200, ctx.body = { 'message': '操作完成' }
         return
     }
 
     /**
      * 新增管理员
      */
-    static async Create (ctx:Router.RouterContext) {
-        const {email, passwd, status, roleId, nickname } = ctx.request.body
+    static async Create(ctx: Router.RouterContext) {
+        const { email, passwd, status, roleId, nickname } = ctx.request.body
         const adminInfo = await AdminUser.findOne({
-            where:{email:email}
+            where: { email: email }
         })
         if (adminInfo !== null) {
-            ctx.status = 400, ctx.body = {'message':'邮箱已存在！'}
+            ctx.status = 400, ctx.body = { 'message': '邮箱已存在！' }
             return
         }
-        if (roleId < 1){
-            ctx.status = 400, ctx.body = {'message':'权限错误！'}
+        if (roleId < 1) {
+            ctx.status = 400, ctx.body = { 'message': '权限错误！' }
             return
         }
+
         const saltRound = await Bcrypt.genSalt(10)
-        AdminUser.create({
+        await AdminUser.create({
             email,
-            passwd: await Bcrypt.hash(passwd,saltRound),
+            passwd: await Bcrypt.hash((passwd ? passwd : '123456'), saltRound),
             status,
-            nickname,
-            adminRoleId:roleId,
+            nickname: nickname ? nickname : "默认用户",
+            adminRoleId: roleId,
         })
-        ctx.status = 200, ctx.body = {'message':'创建成功！'}
+        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
         return
     }
 
     /**
      * 删除管理员
      */
-    static async Delete (ctx:Router.RouterContext) {
+    static async Delete(ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const adminInfo = await AdminUser.findByPk(Number(id))
-        if(adminInfo === null){
-            ctx.status = 400, ctx.body = {'message':'管理员不存在'}
+        if (adminInfo === null) {
+            ctx.status = 400, ctx.body = { 'message': '管理员不存在' }
+            return
+        }
+        if(adminInfo.adminRoleId < 1){
+            ctx.status = 400, ctx.body = { 'message': '无权操作' }
             return
         }
         adminInfo.destroy()
-        ctx.status = 200, ctx.body = {'message': adminInfo.email + '删除成功'}
+        ctx.status = 200, ctx.body = { 'message': adminInfo.email + '删除成功' }
         return
     }
 
     /**
      * 管理员操作日志
      */
-    static async AccessLog (ctx: Router.RouterContext) {
+    static async AccessLog(ctx: Router.RouterContext) {
         const page = Number(ctx.request.query.page)
         const limit = Number(ctx.request.query.limit)
         const offset = (page || 1) * limit - limit
         /**
          * Where 条件
          */
-        const where : WhereOptions = {}
+        const where: WhereOptions = {}
         const adminID = ctx.request.query.admin
-        if(adminID !== undefined){
+        if (adminID !== undefined) {
             where.admin = adminID
         }
         /**
          * Order 条件
          */
-        let order:Order = []
-        if (ctx.request.query.order !== undefined){
-            switch(ctx.request.query.order){
+        let order: Order = []
+        if (ctx.request.query.order !== undefined) {
+            switch (ctx.request.query.order) {
                 case '+id':
-                    order = [['id','ASC']]
+                    order = [['id', 'ASC']]
                     break
-                case '-id' :
-                    order = [['id','DESC']] 
+                case '-id':
+                    order = [['id', 'DESC']]
                     break
             }
         }
 
         const { rows, count } = await AdminAccesslog.findAndCountAll({
-            offset, limit, where, order,include:[{model:AdminUser}]
+            offset, limit, where, order, include: [{ model: AdminUser }]
         })
         ctx.body = {
             data: rows,
@@ -215,18 +231,18 @@ export class AdminController{
 /**
  * 权限管理
  */
-export class RoleController{
+export class RoleController {
     /**
      * 权限列表
      */
-    static async List(ctx:Router.RouterContext) {
+    static async List(ctx: Router.RouterContext) {
         const page = Number(ctx.request.query.page)
         const limit = Number(ctx.request.query.limit)
-        
-        const whereArr: WhereOptions = {} 
+
+        const whereArr: WhereOptions = {}
         const name = ctx.request.query.name
-        if(name !== undefined){
-            whereArr.name = {[Op.like]: '%' + name + '%'}
+        if (name !== undefined) {
+            whereArr.name = { [Op.like]: '%' + name + '%' }
         }
 
         const { rows, count } = await AdminRole.findAndCountAll({
@@ -234,7 +250,7 @@ export class RoleController{
             limit: limit,
             where: whereArr,
         })
-        for(const i of rows){
+        for (const i of rows) {
             i.route = JSON.parse(i.route)
         }
         ctx.body = {
@@ -246,32 +262,32 @@ export class RoleController{
     /**
      * 更新权限
      */
-    static async Update(ctx:Router.RouterContext) {
+    static async Update(ctx: Router.RouterContext) {
         const { id, name, status, menu, route } = ctx.request.body
         const roleInfo = await AdminRole.findByPk(id)
-        if(roleInfo === null){
-            ctx.state = 400, ctx.body = {'message':'用户不存在！'}
+        if (roleInfo === null) {
+            ctx.state = 400, ctx.body = { 'message': '用户不存在！' }
             return
         }
-        roleInfo.name = name, 
-        roleInfo.status = status,
-        roleInfo.menu = menu, 
-        roleInfo.route = JSON.stringify(route),
-        roleInfo.save()
-        ctx.state = 200, ctx.body = {'message':'操作完成'}
+        roleInfo.name = name,
+            roleInfo.status = status,
+            roleInfo.menu = menu,
+            roleInfo.route = JSON.stringify(route),
+            roleInfo.save()
+        ctx.state = 200, ctx.body = { 'message': '操作完成' }
         return
     }
 
     /**
      * 新增权限
      */
-    static async Create(ctx:Router.RouterContext) {
-        const {name, status, menu, route } = ctx.request.body
+    static async Create(ctx: Router.RouterContext) {
+        const { name, status, menu, route } = ctx.request.body
         const roleInfo = await AdminRole.findOne({
-            where:{name}
+            where: { name }
         })
         if (roleInfo !== null) {
-            ctx.status = 400, ctx.body = {'message':'角色已存在！'}
+            ctx.status = 400, ctx.body = { 'message': '角色已存在！' }
             return
         }
         const routeJson = JSON.stringify(route)
@@ -281,22 +297,22 @@ export class RoleController{
             menu,
             route: routeJson,
         })
-        ctx.status = 200, ctx.body = {'message':'创建成功！'}
+        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
         return
     }
 
     /**
      * 删除权限
      */
-    static async Delete(ctx:Router.RouterContext) {
+    static async Delete(ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const roleInfo = await AdminRole.findByPk(Number(id))
-        if(roleInfo === null){
-            ctx.status = 400, ctx.body = {'message':'管理员不存在'}
+        if (roleInfo === null) {
+            ctx.status = 400, ctx.body = { 'message': '管理员不存在' }
             return
         }
         roleInfo.destroy()
-        ctx.status = 200, ctx.body = {'message': roleInfo.name + '删除成功'}
+        ctx.status = 200, ctx.body = { 'message': roleInfo.name + '删除成功' }
         return
     }
 }
