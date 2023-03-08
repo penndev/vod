@@ -48,7 +48,7 @@ const callBack:Queue.ProcessCallbackFunction<VideoFile> = async (job, done) => {
     })
 }
 
-if ( ["queue","dev"].includes(process.env.NODE_ENV as string)){
+if ( ["queue","dev"].includes(process.env.ENV_NODE as string)){
     console.log('bull (ffprobeQueue) started')
     ffprobeQueue.process(callBack)
 }

@@ -45,7 +45,7 @@ VideoTask.belongsTo(VideoTranscode,{ constraints: false, })
 /**
  * 开发环境自动同步表结构，并进行打印。
  */
-if(process.env.NODE_ENV == "dev"){
+if(process.env.ENV_NODE == "dev"){
     await sequelize.sync({ alter: true })
 }
 

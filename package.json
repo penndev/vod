@@ -1,9 +1,12 @@
 {
+  "name": "vod",
+  "private": true,
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "set NODE_ENV=dev&& nodemon --watch src -e ts,js --exec \"ts-node-esm src/index.ts\"",
+    "dev": "set \"ENV_NODE=dev\" && nodemon --watch src -e ts,js --exec \"ts-node-esm src/index.ts\"",
     "serve": "ts-node-esm src/index.ts",
-    "queue": "set NODE_ENV=queue&& ts-node-esm src/queue/index.ts",
+    "queue": "set ENV_NODE=queue && ts-node-esm src/queue/index.ts",
     "lint": "eslint ./src --fix",
     "test": "ts-node-esm test/index.ts"
   },

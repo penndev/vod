@@ -15,7 +15,7 @@ app.use(routes)
 // 挂载静态入口
 app.use(mount("/data","./data"))
 
-if(process.env.NODE_ENV == "dev"){
+if(process.env.ENV_NODE == "dev"){
     app.use(bull('/bull')) // protocol://host/bull
 }
 
