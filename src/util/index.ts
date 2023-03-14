@@ -1,4 +1,4 @@
-import { access, mkdirSync, constants, createReadStream, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, createReadStream, unlinkSync } from 'fs'
 import { parse } from 'path'
 import crypto from 'crypto'
 import os$3 from 'node:os'
@@ -36,27 +36,35 @@ export const sleep = (ms: number) => {
  */
 export const ismkdir = (filepath: string) => {
     const dir = parse(filepath).dir;
-    return new Promise((resolve) => {
-        access(dir, constants.F_OK, (err) => {
-            if(err != null) {
+    return new Promise((resolve, reject) => {
+        try {
+            if (! existsSync(dir)) {
                 mkdirSync(dir,{recursive: true})
             }
             resolve(true)
-        });
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
+/**
+ * 安全删除文件
+ * @param filepath 
+ * @returns 
+ */
 export const isunlink = (filepath: string) => {
     return new Promise((resolve, reject) => {
-        access(filepath, constants.F_OK, (err) => {
-            if(err == null){//文件存在
+        try {
+            if(existsSync(filepath)) {
                 unlinkSync(filepath)
             }
             resolve(true)
-        });
+        } catch (error) {
+            reject(error)
+        }
     })
 }
-
 
 export const randomstr = (length: number) => {
     const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

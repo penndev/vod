@@ -24,6 +24,15 @@ interface uploadPart {
  */
 export class UploadMedia{
     /**
+     * 文件节点管理
+     */
+    static async Node (ctx: Router.RouterContext) {
+        const nodes: { [key: string]: string } = {};
+        nodes[config.node] = ctx.request.protocol + "://" + ctx.request.host
+        ctx.body = nodes
+    }
+
+    /**
      * 上传文件前置创建文件
      */
     static async Before (ctx: Router.RouterContext) {
@@ -357,6 +366,17 @@ export class VideoTaskController{
             ctx.status = 400, ctx.body={"message":"编码器不存在"}
             return 
         }
+        // 验证是否已存在数据
+        const taskExist = await VideoTask.findOne({
+            where: {
+                videoFileId:fileId,
+                videoTranscodeId:transcodeId,
+            }
+        })
+        if (taskExist){
+            ctx.status = 400, ctx.body={"message":"已存在相同的文件与编码器"}
+            return
+        }
 
         // 处理其他更多的参数。
         const options:string[] = [`-vcodec ${transcode.vcodec}`,`-acodec ${transcode.acodec}`]
@@ -367,7 +387,7 @@ export class VideoTaskController{
             if(option) options.push(option)
         }
 
-        // 新建表
+        // 新增转码数据
         const task = await VideoTask.create({
             videoFileId:fileId,
             videoTranscodeId:transcodeId,
@@ -422,7 +442,7 @@ export class VideoTaskController{
         })
         ctx.body = {
             data: rows,
-            total: count
+            total: count,
         }
     }
 

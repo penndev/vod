@@ -166,12 +166,6 @@ class VideoFile extends Model {
                 filePath: {
                     type: DataTypes.STRING,
                     allowNull: true,
-                    get() {
-                        const filepath = this.getDataValue('filePath')
-                        if(filepath){
-                            return 'http://127.0.0.1:8080/' + filepath
-                        }
-                    },
                 },
                 fileMd5: {
                     type: DataTypes.CHAR(32),

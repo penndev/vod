@@ -42,6 +42,7 @@ router.get('/dashboard', vodDashBoard)
  */
 {
     // 原始文件管理
+    router.get('/video/nodes', UploadMedia.Node)
     router.post('/video/upload/part', UploadMedia.Before) 
     router.put('/video/upload/part', UploadMedia.Part)
     router.get('/video/file', VideoFileController.List)

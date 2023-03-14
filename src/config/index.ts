@@ -5,7 +5,7 @@
  */
 const config = {
     node: 1,
-    host: process.env.HOST ?? "127.0.0.1",
+    host: process.env.HOST ?? "0.0.0.0",
     port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
     secret: "secret", // 多节点配置 密钥必须相同
     rdsuri: "redis://127.0.0.1:6379",
