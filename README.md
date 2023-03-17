@@ -19,6 +19,9 @@ VOD CODEC CMS
 
         npm run queue
 
+## 任务
+- config to env
+- upload catch error
 
 ## 配置
 
