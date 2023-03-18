@@ -20,8 +20,10 @@ VOD CODEC CMS
         npm run queue
 
 ## 任务
-- config to env
-- upload catch error
+- 配置项使用env
+- 前端上传catch请求接口的异常
+- orm的删除使用软删除
+- 捕获queue ffprobe 的异常
 
 ## 配置
 
