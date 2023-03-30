@@ -165,8 +165,7 @@ export class AdminController {
             nickname: nickname ? nickname : "默认用户",
             adminRoleId: roleId,
         })
-        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
-        return
+        ctx.body = { 'message': '创建成功！' }
     }
 
     /**
@@ -184,8 +183,7 @@ export class AdminController {
             return
         }
         adminInfo.destroy()
-        ctx.status = 200, ctx.body = { 'message': adminInfo.email + '删除成功' }
-        return
+        ctx.body = { 'message': adminInfo.email + '删除成功' }
     }
 
     /**
@@ -274,7 +272,7 @@ export class RoleController {
             roleInfo.menu = menu,
             roleInfo.route = JSON.stringify(route),
             roleInfo.save()
-        return ctx.body = { 'message': '操作完成' }
+        ctx.body = { 'message': '操作完成' }
     }
 
     /**
@@ -296,8 +294,7 @@ export class RoleController {
             menu,
             route: routeJson,
         })
-        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
-        return
+        ctx.body = { 'message': '创建成功！' }
     }
 
     /**
@@ -311,8 +308,7 @@ export class RoleController {
             return
         }
         roleInfo.destroy()
-        ctx.status = 200, ctx.body = { 'message': roleInfo.name + '删除成功' }
-        return
+        ctx.body = { 'message': roleInfo.name + '删除成功' }
     }
 }
 
