@@ -123,11 +123,11 @@ export class AdminController {
         const { id, email, status, nickname, roleId } = ctx.request.body
         const adminInfo = await AdminUser.findByPk(id)
         if (adminInfo === null) {
-            ctx.state = 400, ctx.body = { 'message': '用户不存在！' }
+            ctx.status = 400, ctx.body = { 'message': '用户不存在！' }
             return
         }
         if (roleId < 1) {
-            ctx.state = 400, ctx.body = { 'message': '权限错误！' }
+            ctx.status = 400, ctx.body = { 'message': '权限错误！' }
             return
         }
         adminInfo.update({
@@ -136,8 +136,8 @@ export class AdminController {
             nickname,
             roleId
         })
-        ctx.state = 200, ctx.body = { 'message': '操作完成' }
-        return
+        return ctx.body = { 'message': '操作完成' }
+        
     }
 
     /**
@@ -165,8 +165,7 @@ export class AdminController {
             nickname: nickname ? nickname : "默认用户",
             adminRoleId: roleId,
         })
-        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
-        return
+        ctx.body = { 'message': '创建成功！' }
     }
 
     /**
@@ -184,8 +183,7 @@ export class AdminController {
             return
         }
         adminInfo.destroy()
-        ctx.status = 200, ctx.body = { 'message': adminInfo.email + '删除成功' }
-        return
+        ctx.body = { 'message': adminInfo.email + '删除成功' }
     }
 
     /**
@@ -266,7 +264,7 @@ export class RoleController {
         const { id, name, status, menu, route } = ctx.request.body
         const roleInfo = await AdminRole.findByPk(id)
         if (roleInfo === null) {
-            ctx.state = 400, ctx.body = { 'message': '用户不存在！' }
+            ctx.status = 400, ctx.body = { 'message': '用户不存在！' }
             return
         }
         roleInfo.name = name,
@@ -274,8 +272,7 @@ export class RoleController {
             roleInfo.menu = menu,
             roleInfo.route = JSON.stringify(route),
             roleInfo.save()
-        ctx.state = 200, ctx.body = { 'message': '操作完成' }
-        return
+        ctx.body = { 'message': '操作完成' }
     }
 
     /**
@@ -297,8 +294,7 @@ export class RoleController {
             menu,
             route: routeJson,
         })
-        ctx.status = 200, ctx.body = { 'message': '创建成功！' }
-        return
+        ctx.body = { 'message': '创建成功！' }
     }
 
     /**
@@ -312,8 +308,7 @@ export class RoleController {
             return
         }
         roleInfo.destroy()
-        ctx.status = 200, ctx.body = { 'message': roleInfo.name + '删除成功' }
-        return
+        ctx.body = { 'message': roleInfo.name + '删除成功' }
     }
 }
 

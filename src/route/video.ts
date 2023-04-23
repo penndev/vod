@@ -115,7 +115,10 @@ export class UploadMedia{
         const totalPart = Math.ceil(partData.fsize/partData.urate)
         if(partData.ucount === totalPart){ // 查验文件信息
             const data = await VideoFile.findByPk(partData.fid)
-            ffprobeQueue.add(data)
+            if(data == null){
+                return ctx.status = 400, ctx.body = {message:"原文件id找不到！"}
+            }
+            await ffprobeQueue.add(data)
             await redis.DEL(cacheKey)
         }
 
