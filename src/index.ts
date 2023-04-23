@@ -16,11 +16,10 @@ app.use(routes)
 app.use(mount("/data","./data"))
 
 if(process.env.ENV_NODE == "dev"){
-    app.use(bull('/bull')) // protocol://host/bull
+    app.use(bull('/bull'))
 }
 
 app.listen(config.port, config.host)
 for(const item of networks(config.host)){
     console.log('\x1b[34mOPEN Brower\x1b[1;33m -> \x1b[0;32mhttp://%s:%s\x1b[0m', item.address, config.port)
 }
-

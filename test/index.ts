@@ -1,3 +1,4 @@
-import { ismkdir } from "../src/util/index.js";
+import { networks } from "../src/util/index.js";
 
-console.log("Hand run test", await ismkdir('data/2/1.txt'))
+
+console.log(networks('192.168.7.10')) 

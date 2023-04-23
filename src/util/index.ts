@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, createReadStream, unlinkSync } from 'fs'
 import { parse } from 'path'
 import crypto from 'crypto'
-import os$3 from 'node:os'
+import os from 'node:os'
 
 export const md5 = (d: string) => {
     return crypto.createHash('md5').update(d, 'utf8').digest('hex') 
@@ -76,11 +76,11 @@ export const randomstr = (length: number) => {
 }
 
 export const networks = (host: string) => {
-    const netInterface = Object.values(os$3.networkInterfaces())
-    const netFlatMap = netInterface.flatMap((nInterface) => nInterface ?? [])
-    host as string
-    return netFlatMap.filter((detail) => detail && detail.address && detail.family == 'IPv4')
+    const netInterface = Object.values(os.networkInterfaces());
+    const netFlatMap = netInterface.flatMap((nInterface) => nInterface ?? []);
+    return netFlatMap.filter((detail) => detail && (detail.address === host || host === '0.0.0.0') && detail.family === 'IPv4');
 }
+
 
 export const parseNumber = (value:string | string[] | undefined | null, defaultValue:number) => {
     const num = parseInt(value as string);
