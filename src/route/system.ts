@@ -4,7 +4,7 @@ import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
 import { AdminUser, AdminAccesslog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
-import Config from '../config/index.js'
+import config from '../config/index.js'
 import Bcrypt from 'bcrypt'
 import { Order, WhereOptions, Op, } from 'sequelize'
 
@@ -72,11 +72,12 @@ export const login = async (ctx: Router.RouterContext) => {
 
     ctx.body = {
         'token':
-            Jwt.sign({
-                sub: adminInfo.id,
-                exp: Math.floor(Date.now() / 1000) + 86400 * 7
-            },
-                Config.secret
+            Jwt.sign(
+                {
+                    sub: adminInfo.id,
+                    exp: Math.floor(Date.now() / 1000) + 86400 * 7
+                },
+                config.secret
             ),
         'routes': routes
     }

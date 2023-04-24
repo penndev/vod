@@ -6,12 +6,13 @@ import { AdminAccesslog, AdminUser, AdminRole, VideoFile, VideoTranscode, VideoT
  * 数据库连接实例
  * 并对连通性进行测试
  */
-const sequelize = new Sequelize(config.dburi,{
+const sequelize = new Sequelize(config.dbParse,{
     timezone: '+08:00',
     dialectOptions: {
         dateStrings: true,
-        typeCast: true
-    }
+        typeCast: true,
+    },
+    logging: false
 })
 await sequelize.authenticate()
 
@@ -45,7 +46,7 @@ VideoTask.belongsTo(VideoTranscode,{ constraints: false, })
 /**
  * 开发环境自动同步表结构，并进行打印。
  */
-if(process.env.ENV_NODE == "dev"){
+if(config.mode == "dev"){
     await sequelize.sync({ alter: true })
 }
 

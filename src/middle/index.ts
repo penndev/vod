@@ -11,19 +11,16 @@ import { parseNumber } from '../util/index.js'
 
 
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
-    if (ctx.method !== 'OPTIONS') {
-        await next()
-        ctx.set('Access-Control-Allow-Origin', '*')
+    if (ctx.method == 'OPTIONS') {
+        ctx.status = 204
     }else{
-        ctx.status = 204;
-        ctx.set('Access-Control-Allow-Origin', '*')
-        ctx.set('Access-Control-Allow-Methods', '*')
-        ctx.set('Access-Control-Allow-Headers', '*')
-    }
-    // ctx.set('Access-Control-Allow-Origin', '*')
-    // ctx.set('Access-Control-Allow-Methods', '*')
-    // ctx.set('Access-Control-Allow-Headers', '*')
-    // ctx.set('Access-Control-Allow-Credentials', "true")
+        await next()
+    }    
+    ctx.set('Access-Control-Allow-Origin', '*')
+    ctx.set('Access-Control-Allow-Methods', '*')
+    ctx.set('Access-Control-Allow-Headers', '*')
+    ctx.set('Access-Control-Max-Age', '3600')
+    ctx.set('Access-Control-Allow-Credentials', "true")
 }
 
 export const log = async (ctx: Router.RouterContext, next: Next) => {

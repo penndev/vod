@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import config from '../config/index.js';
 
 const redis = createClient({
-    url: config.rdsuri,
+    url: config.redisParse,
 })
 
 redis.on('error', (err) => {

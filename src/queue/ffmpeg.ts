@@ -1,12 +1,17 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import config from '../config/index.js'
-import { ffmpegInput } from './interface.js'
 import { VideoTask } from '../orm/model.js'
 import { parse, resolve } from 'path'
 
-const ffmpegQueue = new Queue('ffmpeg transcodes', config.rdsuri, {prefix:`bull:${config.node}`})
+export interface ffmpegInput {
+    inputFile: string
+    outPutFile: string
+    options: string[]
+    taskId: number
+}
 
+const ffmpegQueue = new Queue('ffmpeg transcodes', config.redisParse, {prefix:`bull:${config.node}`})
 
 const callBack:Queue.ProcessCallbackFunction<ffmpegInput> = async(job,done)=>{
     const jobData =  job.data as ffmpegInput

@@ -64,7 +64,7 @@ export class UploadMedia{
             node: config.node,
         })
         await data.update({
-            filePath: `data/${config.node}/media/${data.fileMd5.slice(0,3)}/${data.fileMd5}/${data.fileName}`
+            filePath: `data/node_${config.node}/file/${data.fileMd5.slice(0,3)}/${data.fileMd5}/${data.fileName}`
         })
         //清理掉历史遗留文件
         await isunlink(data.filePath)
