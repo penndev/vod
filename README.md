@@ -17,17 +17,14 @@ VOD CODEC CMS
 
 -  启动生产bull 后台队列
 
-        npm run queue
+        npm run task
 
-## 任务
-- 配置项使用env
-- 前端上传catch请求接口的异常
-- orm的删除使用软删除
-- 捕获queue ffprobe 的异常
 
 ## 配置
 
-配置文件 `src/config/index.ts`
+配置文件
+- `.env`
+- `src/config/index.ts`
 
 ## 依赖
 
@@ -36,6 +33,8 @@ VOD CODEC CMS
 
 [ffmpeg](https://ffmpeg.org)
 > 转码依赖于ffmpeg工具必须保证你运行代码的机器已经安装并可以执行ffmpeg命令和ffprobe命令
+
+`ffmpeg -i in.mp4 -vcodec libx264 -acodec aac -hls_list_size 0 -hls_time 30 -hls_enc 1 -hls_enc_key 0123456789abcdef out.m3u8`
 
 
 

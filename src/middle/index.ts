@@ -5,7 +5,7 @@ import mime from 'mime'
 import { Next } from 'koa'
 import { koaBody } from 'koa-body'
 import { AdminAccesslog, AdminUser, AdminRole } from '../orm/index.js'
-import { serverAdapter } from '../queue/index.js'
+import { serverAdapter } from '../task/index.js'
 import { createReadStream, existsSync, statSync } from 'fs'
 import { parseNumber } from '../util/index.js'
 
@@ -106,14 +106,20 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     query: ctx.request.query,
     body: ctx.request.body
   }
-  await AdminAccesslog.create({
-    adminUserId: adminInfo.id,
-    path: ctx.request.path,
-    method: ctx.request.method,
-    ip: ctx.request.ip,
-    payload: JSON.stringify(param, null, 2),
-    status: ctx.response.status
-  })
+
+  /**
+   * 处理记录什么类型的日志，如果什么都记录会数据过大
+   */
+  if (ctx.request.method in ['POST', 'DELETE']) {
+    await AdminAccesslog.create({
+      adminUserId: adminInfo.id,
+      path: ctx.request.path,
+      method: ctx.request.method,
+      ip: ctx.request.ip,
+      payload: JSON.stringify(param, null, 2),
+      status: ctx.response.status
+    })
+  }
 }
 
 /** koa post 拓展 */
@@ -131,8 +137,6 @@ export const mount = (u:string, d:string) => {
       if (existsSync(fspath)) { // 文件存在
         const fsstat = statSync(fspath)
         if (fsstat.isFile()) { // 处理发送文件，并实现 http range
-          ctx.status = 206
-          ctx.set('Accept-Ranges', 'bytes')
           ctx.set('Last-Modified', fsstat.birthtime.toUTCString())
           const ctype = mime.getType(fspath)
           if (ctype) {
@@ -141,6 +145,8 @@ export const mount = (u:string, d:string) => {
 
           const range = ctx.request.headers.range
           if (range) {
+            ctx.status = 206
+            ctx.set('Accept-Ranges', 'bytes')
             const parts = range.replace(/bytes=/, '').split('-')
             const start = parseNumber(parts[0], 0)
             const endbyte = parseNumber(parts[1], fsstat.size - 1)
@@ -151,6 +157,7 @@ export const mount = (u:string, d:string) => {
           } else {
             ctx.set('Content-Length', `${fsstat.size}`)
             ctx.body = createReadStream(fspath)
+            ctx.status = 200
           }
           return
         }

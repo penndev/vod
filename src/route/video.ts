@@ -1,14 +1,14 @@
 import Router from '@koa/router'
 import redis from '../redis/index.js'
-import config from '../config/index.js'
 import { WhereOptions, Op, Order } from 'sequelize'
 
 import { VideoFile, VideoTranscode, VideoTask } from '../orm/index.js'
 import { File } from 'formidable'
 import { readFileSync, writeFileSync } from 'fs'
-import { ffprobeQueue, ffmpegQueue, ffmpegInput } from '../queue/index.js'
-import { ismkdir, isunlink, parseNumber } from '../util/index.js'
+import { transcodeTask, transcodeTaskData } from '../task/index.js'
+import { ismkdir, isunlink, md5laragefile, parseNumber } from '../util/index.js'
 import { dirname, join } from 'path/posix'
+import { ffprobeDataJson } from '../util/vod.js'
 
 /** 上传媒体文件 */
 interface uploadPart {
@@ -24,15 +24,6 @@ interface uploadPart {
  */
 export class UploadMedia {
   /**
-     * 文件节点管理
-     */
-  static async Node (ctx: Router.RouterContext) {
-    const nodes: { [key: string]: string } = {}
-    nodes[config.node] = ctx.request.protocol + '://' + ctx.request.host
-    ctx.body = nodes
-  }
-
-  /**
      * 上传文件前置创建文件
      */
   static async Before (ctx: Router.RouterContext) {
@@ -43,7 +34,7 @@ export class UploadMedia {
       return
     }
 
-    const cacheKey = `upload-${md5}`
+    const cacheKey = `upload:${md5}`
     const cacheData = await redis.GET(cacheKey)
     if (cacheData) {
       ctx.body = JSON.parse(cacheData) as uploadPart
@@ -61,11 +52,10 @@ export class UploadMedia {
       fileName: name,
       fileMd5: md5,
       fileSize: size,
-      status: 0,
-      node: config.node
+      status: 0
     })
     await data.update({
-      filePath: `data/node_${config.node}/file/${data.fileMd5.slice(0, 3)}/${data.fileMd5}/${data.fileName}`
+      filePath: `data/video/${data.fileMd5.slice(0, 3)}/${data.fileMd5}/${data.fileName}`
     })
     // 清理掉历史遗留文件
     await isunlink(data.filePath)
@@ -84,7 +74,6 @@ export class UploadMedia {
      * 上传分片文件，上传完成后合并
      */
   static async Part (ctx: Router.RouterContext) {
-    // 当前分片编号1开始，总分片数量，上传ID, 上传数据
     const { currentPart, uploadID } = ctx.request.body
     const uploadData = ctx.request.files?.uploadData
     if (currentPart === undefined || !uploadID || typeof uploadData !== 'object') {
@@ -93,7 +82,7 @@ export class UploadMedia {
       return
     }
 
-    const cacheKey = `upload-${uploadID}`
+    const cacheKey = `upload:${uploadID}`
     const cacheData = await redis.GET(cacheKey)
     if (!cacheData) {
       ctx.status = 400
@@ -115,16 +104,43 @@ export class UploadMedia {
     // 判断是否是最后一次上传.
     const totalPart = Math.ceil(partData.fsize / partData.urate)
     if (partData.ucount === totalPart) { // 查验文件信息
-      const data = await VideoFile.findByPk(partData.fid)
-      if (data == null) {
+      const vf = await VideoFile.findByPk(partData.fid)
+      if (vf == null) {
         ctx.status = 400
         ctx.body = { message: '原文件id找不到！' }
         return
       }
-      await ffprobeQueue.add(data)
-      await redis.DEL(cacheKey)
-    }
+      // 超过10G的文件可能会造成请求超时。
+      const md5 = await md5laragefile(vf.filePath)
+      if (vf.fileMd5 !== md5) {
+        vf.status = -1
+        await vf.save()
+        await redis.DEL(cacheKey)
+        ctx.status = 400
+        ctx.body = { message: 'md5 验证失败！' }
+        return
+      }
 
+      vf.status = -2
+      const ffprobeData = await ffprobeDataJson(vf.filePath)
+      for (const item of ffprobeData.streams) {
+        if (item.codec_type === 'video') {
+          vf.status = 1
+          vf.videoDuration = parseNumber(item.duration, 0)
+
+          let fps = 0
+          const [f, s] = (item.r_frame_rate as string).split('/').map(Number)
+          if (f && s) {
+            fps = Math.floor(f / s)
+          }
+          vf.videoFps = fps
+          vf.videoBitrate = parseNumber(item.bit_rate, 0)
+          vf.videoWidth = parseNumber(item.width, 0)
+          vf.videoHeight = parseNumber(item.height, 0)
+        }
+      }
+      await vf.save()
+    }
     ctx.body = {
       message: 'ok'
     }
@@ -161,6 +177,10 @@ export class VideoFileController {
       limit,
       where,
       order
+    })
+    const host = `${ctx.request.protocol}://${ctx.request.host}`
+    rows.forEach(vf => {
+      vf.setDataValue('FilePath', host + '/' + vf.filePath)
     })
     ctx.body = {
       data: rows,
@@ -203,9 +223,10 @@ export class VideoFileController {
       ctx.body = { message: '数据不存在' }
       return
     }
-    // 是否删除文件
-    mediaInfo.destroy()
-    ctx.status = 200
+
+    const cacheKey = `upload:${mediaInfo.fileMd5}`
+    await redis.DEL(cacheKey)
+    await mediaInfo.destroy()
     ctx.body = { message: mediaInfo.fileName + '删除成功' }
   }
 }
@@ -374,24 +395,24 @@ export class VideoTaskController {
       ctx.body = { message: '编码器不存在' }
       return
     }
-    // 验证是否已存在数据
-    const taskExist = await VideoTask.findOne({
-      where: {
-        videoFileId: fileId,
-        videoTranscodeId: transcodeId
-      }
-    })
-    if (taskExist) {
-      ctx.status = 400
-      ctx.body = { message: '已存在相同的文件与编码器' }
-      return
-    }
+    // // 验证是否已存在数据
+    // const taskExist = await VideoTask.findOne({
+    //   where: {
+    //     videoFileId: fileId,
+    //     videoTranscodeId: transcodeId
+    //   }
+    // })
+    // if (taskExist) {
+    //   ctx.status = 400
+    //   ctx.body = { message: '已存在相同的文件与编码器' }
+    //   return
+    // }
 
     // 处理其他更多的参数。
     const options:string[] = [`-vcodec ${transcode.vcodec}`, `-acodec ${transcode.acodec}`]
     // 编码器参数配置+覆盖。
-    const mergeOptions = (transcode.command ?? '') + ';' + (command ?? '')
-    for (const item of mergeOptions.split(';')) {
+    const mergeOptions = (transcode.command ?? '') + '\n' + (command ?? '')
+    for (const item of mergeOptions.split('\n')) {
       const option = item.trim()
       if (option) options.push(option)
     }
@@ -407,13 +428,13 @@ export class VideoTaskController {
     await task.save()
     await ismkdir(task.outFile)
 
-    const finput:ffmpegInput = {
+    const finput:transcodeTaskData = {
       inputFile: file?.filePath,
       options,
       outPutFile: task.outFile,
       taskId: task.id
     }
-    const jobInfo = await ffmpegQueue.add(finput)
+    const jobInfo = await transcodeTask.add(finput, { attempts: 0 })
     redis.set(`task:progress:${task.id}`, jobInfo.id, { EX: 86400 })
     ctx.body = {
       message: '提交完成',
@@ -449,6 +470,11 @@ export class VideoTaskController {
         { model: VideoTranscode }
       ]
     })
+    const host = `${ctx.request.protocol}://${ctx.request.host}`
+    rows.forEach(vt => {
+      vt.setDataValue('OutFile', host + '/' + vt.outFile)
+    })
+
     ctx.body = {
       data: rows,
       total: count
@@ -470,7 +496,7 @@ export class VideoTaskController {
       ctx.body = { message: '任务过期' }
       return
     }
-    const job = await ffmpegQueue.getJob(jobId)
+    const job = await transcodeTask.getJob(jobId)
     // 判断job
     ctx.body = job
   }

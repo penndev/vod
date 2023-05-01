@@ -2,7 +2,6 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const config = {
-  node: 0, // 多节点运行拓展。
   mode: process.env.APP_MODE ?? 'prod',
   host: process.env.APP_HOST ?? '127.0.0.1',
   port: process.env.APP_PORT ? parseInt(process.env.APP_PORT) : 8000,

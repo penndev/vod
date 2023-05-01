@@ -133,7 +133,6 @@ class VideoFile extends Model {
   declare createdAt: Date
   declare updatedAt: Date
 
-  declare node: string
   declare status: number
 
   declare fileName: string
@@ -150,14 +149,10 @@ class VideoFile extends Model {
   public static initial (options: InitOptions) {
     this.init(
       {
-        node: {
-          type: DataTypes.STRING,
-          allowNull: false
-        },
         status: {
           type: DataTypes.TINYINT,
           defaultValue: 0,
-          comment: '-1文件错误|0|1文件分析完成'
+          comment: '-2:视频ffprobe分析错误|-1:md5错误|0:上传中|1:媒体分析正常'
         },
         fileName: {
           type: DataTypes.STRING,

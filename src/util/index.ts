@@ -85,6 +85,11 @@ export const randomstr = (length: number) => {
   return result
 }
 
+/**
+ * 返回本机host
+ * @param host 某个host
+ * @returns
+ */
 export const networks = (host: string) => {
   const netInterface = Object.values(os.networkInterfaces())
   const netFlatMap = netInterface.flatMap((nInterface) => nInterface ?? [])
