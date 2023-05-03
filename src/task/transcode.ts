@@ -3,6 +3,7 @@ import Queue from 'bull'
 import config from '../config/index.js'
 import { VideoTask } from '../orm/model.js'
 import { parse, resolve } from 'path'
+import { getFolderSize } from '../util/index.js'
 
 interface transcodeTaskData {
     inputFile: string
@@ -29,7 +30,8 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
     job.log('开始转码：转码命令' + commandLine)
   })
   transcoding.on('end', async () => {
-    VideoTask.update({ status: 1 }, { where: { id: jobData.taskId } })
+    const outSize = getFolderSize(outPutFileParse.dir) // 获取文件夹大小
+    VideoTask.update({ status: 1, outSize }, { where: { id: jobData.taskId } })
     done()
   })
   transcoding.on('error', (err, stdout, stderr) => {

@@ -4,12 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "set \"ENV_NODE=dev\" && nodemon --watch ./src -e ts,js --exec \"eslint ./src --fix && ts-node-esm src/index.ts\"",
+    "dev": "nodemon --watch ./src -e ts,js --exec \"eslint ./src --fix && ts-node-esm src/index.ts\"",
     "serve": "ts-node-esm src/index.ts",
-    "queue": "set ENV_NODE=queue && ts-node-esm src/queue/index.ts",
-    "test": "ts-node-esm test/index.ts",
-    "lint": "eslint ./src",
-    "lint:fix": "eslint ./src --fix"
+    "test": "ts-node-esm test/index.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
