@@ -512,9 +512,9 @@ export const vodDashBoard = async (ctx:Router.RouterContext) => {
   const transcodeTotal = await VideoTranscode.count()
   const taskTotal = await VideoTask.count()
   ctx.body = {
-    total1: fileSize,
-    total2: fileTotal,
-    total3: transcodeTotal,
-    total4: taskTotal
+    fileSize,
+    fileTotal,
+    taskTotal,
+    transcodeTotal
   }
 }

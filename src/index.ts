@@ -21,7 +21,16 @@ if (config.mode === 'dev') {
   app.use(bull('/bull'))
 }
 
+app.on('error', (err) => {
+  if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
+    // tcp客户端关闭 koa不对tcp层做处理
+  } else {
+    console.error(err)
+  }
+})
+
 const srv = app.listen(config.port, config.host)
+
 srv.on('listening', () => {
   const srvAddr = srv.address() as AddressInfo
   for (const item of networks(srvAddr.address)) {

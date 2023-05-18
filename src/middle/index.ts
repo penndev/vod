@@ -132,7 +132,7 @@ export const bull = (path:string) => {
 
 export const mount = (u:string, d:string) => {
   return async (ctx: Router.RouterContext, next: Next) => {
-    if (ctx.request.method === 'GET' && ctx.request.path.startsWith(u)) {
+    if (ctx.request.path.startsWith(u) && (ctx.request.method === 'GET' || ctx.request.method === 'HEAD')) {
       const fspath = decodeURIComponent(ctx.request.path.replace(RegExp('^' + u), d))
       if (existsSync(fspath)) { // 文件存在
         const fsstat = statSync(fspath)
@@ -142,11 +142,10 @@ export const mount = (u:string, d:string) => {
           if (ctype) {
             ctx.set('Content-Type', ctype)
           }
-
           const range = ctx.request.headers.range
+          ctx.set('Accept-Ranges', 'bytes')
           if (range) {
             ctx.status = 206
-            ctx.set('Accept-Ranges', 'bytes')
             const parts = range.replace(/bytes=/, '').split('-')
             const start = parseNumber(parts[0], 0)
             const endbyte = parseNumber(parts[1], fsstat.size - 1)
@@ -155,9 +154,9 @@ export const mount = (u:string, d:string) => {
             ctx.set('Content-Range', `bytes ${start}-${end}/${fsstat.size}`)
             ctx.body = createReadStream(fspath, { start, end })
           } else {
+            ctx.status = 200
             ctx.set('Content-Length', `${fsstat.size}`)
             ctx.body = createReadStream(fspath)
-            ctx.status = 200
           }
           return
         }
