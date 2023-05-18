@@ -1,24 +1,14 @@
 # vod
 
-VOD CODEC CMS
+a vod codec cms
 
 > 一个简单的在线编码（转码）后台管理系统
 
-
 ## 启动
 
-- 启动开发服务器（http服务，队列，数据库打印等）
+- `npm run dev`
 
-        npm run dev 
-
-- 启动生产koa http服务
-
-        npm run serve
-
--  启动生产bull 后台队列
-
-        npm run task
-
+- `npm run serve`
 
 ## 配置
 
@@ -34,8 +24,6 @@ VOD CODEC CMS
 [ffmpeg](https://ffmpeg.org)
 > 转码依赖于ffmpeg工具必须保证你运行代码的机器已经安装并可以执行ffmpeg命令和ffprobe命令
 
-`ffmpeg -i in.mp4 -vcodec libx264 -acodec aac -hls_list_size 0 -hls_time 30 -hls_enc 1 -hls_enc_key 0123456789abcdef out.m3u8`
-
-
-
+## mp4 to hls
+> `ffmpeg -i in.mp4 -vcodec libx264 -acodec aac -hls_list_size 0 -hls_time 30 -hls_enc 1 -hls_enc_key 0123456789abcdef out.m3u8`
 
