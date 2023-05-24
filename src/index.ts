@@ -1,18 +1,21 @@
 import Koa from 'koa'
 
 import { cors, log, bull, mount } from './middle/index.js'
-import routes from './route/index.js'
+import { adminRoute } from './route/index.js'
 import config from './config/index.js'
 import { networks } from './util/index.js'
 import { AddressInfo } from 'net'
 
 const app = new Koa()
 
+// 允许跨域
 app.use(cors)
+
+// 请求日志记录
 app.use(log)
 
 // 请求路由主入口
-app.use(routes)
+app.use(adminRoute('/api'))
 
 // 挂载静态入口
 app.use(mount('/data', './data'))

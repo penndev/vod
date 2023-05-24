@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
 import { AdminAccesslog, AdminUser, AdminRole, VideoFile, VideoTranscode, VideoTask } from './model.js'
+import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from './archive.js'
 
 /**
  * 数据库连接实例
@@ -43,6 +44,22 @@ VideoTask.belongsTo(VideoFile, { constraints: false })
 VideoTask.belongsTo(VideoTranscode, { constraints: false })
 
 /**
+ * 资料管理归档表
+ * @param ArchiveList 资料列表
+ * @param ArchiveCategory 资料分类
+ * @param ArchiveTag 标签表
+ * @param ArchiveTagMap 标签资料映射表
+ */
+ArchiveList.initial({ sequelize, underscored: true })
+ArchiveCategory.initial({ sequelize, underscored: true })
+ArchiveTag.initial({ sequelize, underscored: true })
+ArchiveTagMap.initial({ sequelize, underscored: true })
+// *** 处理关联联系
+ArchiveList.belongsTo(ArchiveCategory, { constraints: false })
+ArchiveTagMap.belongsTo(ArchiveTag, { constraints: false })
+ArchiveTagMap.belongsTo(ArchiveList, { constraints: false })
+
+/**
  * 开发环境自动同步表结构，并进行打印。
  */
 if (config.mode === 'dev') {
@@ -53,7 +70,13 @@ export {
   AdminUser,
   AdminRole,
   AdminAccesslog,
+  // - 分组
   VideoFile,
   VideoTranscode,
-  VideoTask
+  VideoTask,
+  // - 分组
+  ArchiveCategory,
+  ArchiveList,
+  ArchiveTag,
+  ArchiveTagMap
 }

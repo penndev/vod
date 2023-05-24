@@ -3,7 +3,7 @@ import { auth, body } from '../middle/index.js'
 import { AdminController, captcha, login, RoleController } from './system.js'
 import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController, vodDashBoard } from './video.js'
 
-const router = new Router({ prefix: '/api' })
+const router = new Router()
 /**
  * 允许post参数与文件上传
  */
@@ -58,4 +58,6 @@ router.get('/dashboard', vodDashBoard)
   router.get('/video/task/progress', VideoTaskController.Progress)
 }
 
-export default router.routes()
+export const adminRoute = (prefix: string) => {
+  return router.prefix(prefix).routes()
+}
