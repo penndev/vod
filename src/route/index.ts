@@ -2,8 +2,10 @@ import Router from '@koa/router'
 import { auth, body } from '../middle/index.js'
 import { AdminController, captcha, login, RoleController } from './system.js'
 import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController, vodDashBoard } from './video.js'
+import { ArchiveListController } from './archive.js'
 
 const router = new Router()
+
 /**
  * 允许post参数与文件上传
  */
@@ -58,6 +60,21 @@ router.get('/dashboard', vodDashBoard)
   router.get('/video/task/progress', VideoTaskController.Progress)
 }
 
+/**
+ * 返回资料接口
+ */
+{
+  router.post('/archive/list', ArchiveListController.Add)
+  router.get('/archive/list', ArchiveListController.List)
+  router.put('/archive/list', ArchiveListController.Update)
+  router.delete('/archive/list', ArchiveListController.Delete)
+}
+
+/**
+ * 返回路由
+ * @param prefix archive
+ * @returns routes
+ */
 export const adminRoute = (prefix: string) => {
   return router.prefix(prefix).routes()
 }
