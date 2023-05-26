@@ -53,18 +53,11 @@ export const md5laragefile = (p :string) => {
  * @param filepath
  * @returns
  */
-export const ismkdir = (filepath: string) => {
+export const ismkdir = async (filepath: string) => {
   const dir = parse(filepath).dir
-  return new Promise((resolve, reject) => {
-    try {
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true })
-      }
-      resolve(true)
-    } catch (error) {
-      reject(error)
-    }
-  })
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
 }
 
 /**

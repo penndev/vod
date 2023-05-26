@@ -164,11 +164,12 @@ export class ArchiveList extends Model {
         },
         sub: {
           type: DataTypes.STRING,
-          allowNull: false
+          allowNull: true
         },
         pic: {
           type: DataTypes.STRING,
-          allowNull: false
+          allowNull: false,
+          defaultValue: ''
         },
         total: {
           type: DataTypes.MEDIUMINT.UNSIGNED,

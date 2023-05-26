@@ -1,26 +1,55 @@
 import Router from '@koa/router'
-import { parseNumber } from '../util/index.js'
+import { ismkdir, parseNumber } from '../util/index.js'
 import { Op, Order, WhereOptions } from 'sequelize'
 import { ArchiveCategory, ArchiveList, ArchiveTag } from '../orm/index.js'
+import axios from 'axios'
+import { randomUUID } from 'crypto'
+import sharp from 'sharp'
+import { writeFileSync } from 'fs'
 
 /**
  * 资料
  */
 export class ArchiveListController {
   /**
+   * 下载封面图片并格式化为jpeg
+   */
+  static async downPic (pic:string) {
+    const iresult = await axios.get(pic, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
+      },
+      timeout: 30 * 1000,
+      responseType: 'arraybuffer'
+    })
+    if (iresult.status === 200 && iresult.data) {
+      return await sharp(iresult.data).toFormat('jpeg').toBuffer()
+    }
+    throw Error('获取图片失败')
+  }
+
+  /**
    * 新增转码配置
    */
   static async Add (ctx: Router.RouterContext) {
     const {
-      name
+      pic,
+      status, name, sub, total, year, lang, area, content
     } = ctx.request.body
-
+    // 首先验证图片
+    const picBuffer = await ArchiveListController.downPic(pic)
     const data = await ArchiveList.create({
-      name
+      status, name, sub, total, year, lang, area, content
     })
+    // 处理图片保存路径
+    const newPic = `data/pic/${data.id}/${randomUUID()}.jpg`
+    await ismkdir(newPic)
+    writeFileSync(newPic, picBuffer)
+    data.pic = newPic
+    await data.save()
 
     ctx.body = {
-      message: `${data.name}[${data.id}] 添加成功`
+      message: `${data.name} [${data.id}] 添加成功`
     }
   }
 
@@ -48,6 +77,16 @@ export class ArchiveListController {
       where,
       order
     })
+
+    const host = `${ctx.request.protocol}://${ctx.request.host}`
+    rows.forEach(vf => {
+      vf.setDataValue('Pic', host + '/' + vf.pic)
+    })
+    ctx.body = {
+      data: rows,
+      total: count
+    }
+
     ctx.body = {
       data: rows,
       total: count
@@ -59,20 +98,26 @@ export class ArchiveListController {
    */
   static async Update (ctx: Router.RouterContext) {
     const {
-      id,
-      name
+      id, pic,
+      status, name, sub, total, year, lang, area, content
     } = ctx.request.body
-    const vtinfo = await ArchiveList.findByPk(id)
-    if (vtinfo == null) {
+    const alinfo = await ArchiveList.findByPk(id)
+    if (alinfo == null) {
       ctx.status = 400
       ctx.body = { message: 'ID不存在' }
       return
     }
-
-    if (vtinfo.name !== name) {
-      vtinfo.name = name
+    let newPic = pic
+    if (alinfo.pic !== newPic) {
+      newPic = 'newPic'
+      console.log('// 处理图片')
     }
-    await vtinfo.save()
+
+    await alinfo.update({
+      pic: newPic, status, name, sub, total, year, lang, area, content
+    })
+
+    await alinfo.save()
     ctx.body = { message: '修改完成' }
   }
 
