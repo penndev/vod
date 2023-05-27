@@ -147,11 +147,18 @@ export class ArchiveCategoryController {
    */
   static async Add (ctx: Router.RouterContext) {
     const {
-      name
+      parent, status, name, content, order
     } = ctx.request.body
-
+    if (parent > 0) {
+      const ptInfo = await ArchiveCategory.findByPk(parent)
+      if (ptInfo == null || ptInfo.parent !== 0) {
+        ctx.status = 400
+        ctx.body = { message: '父级分类不规范' }
+        return
+      }
+    }
     const data = await ArchiveCategory.create({
-      name
+      parent, status, name, content, order
     })
 
     ctx.body = {
@@ -195,19 +202,23 @@ export class ArchiveCategoryController {
   static async Update (ctx: Router.RouterContext) {
     const {
       id,
-      name
+      parent, status, name, content, order
     } = ctx.request.body
-    const vtinfo = await ArchiveCategory.findByPk(id)
-    if (vtinfo == null) {
+    const acInfo = await ArchiveCategory.findByPk(id)
+    if (acInfo == null) {
       ctx.status = 400
       ctx.body = { message: 'ID不存在' }
       return
     }
-
-    if (vtinfo.name !== name) {
-      vtinfo.name = name
+    if (parent > 0) {
+      const ptInfo = await ArchiveCategory.findByPk(parent)
+      if (ptInfo == null || ptInfo.parent !== 0) {
+        ctx.status = 400
+        ctx.body = { message: '父级分类不规范' }
+        return
+      }
     }
-    await vtinfo.save()
+    await acInfo.update({ parent, status, name, content, order })
     ctx.body = { message: '修改完成' }
   }
 
