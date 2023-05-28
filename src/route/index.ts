@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import { auth, body } from '../middle/index.js'
 import { AdminController, captcha, login, RoleController } from './system.js'
 import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController, vodDashBoard } from './video.js'
-import { ArchiveCategoryController, ArchiveListController } from './archive.js'
+import { ArchiveCategoryController, ArchiveListController, ArchiveTagController } from './archive.js'
 
 const router = new Router()
 
@@ -75,6 +75,12 @@ router.get('/dashboard', vodDashBoard)
   router.get('/archive/category', ArchiveCategoryController.List)
   router.put('/archive/category', ArchiveCategoryController.Update)
   router.delete('/archive/category', ArchiveCategoryController.Delete)
+
+  // 编辑类别
+  router.post('/archive/tag', ArchiveTagController.Add)
+  router.get('/archive/tag', ArchiveTagController.List)
+  router.put('/archive/tag', ArchiveTagController.Update)
+  router.delete('/archive/tag', ArchiveTagController.Delete)
 }
 
 /**

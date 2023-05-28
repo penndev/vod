@@ -248,11 +248,11 @@ export class ArchiveTagController {
    */
   static async Add (ctx: Router.RouterContext) {
     const {
-      name
+      status, name, content, hits
     } = ctx.request.body
 
     const data = await ArchiveTag.create({
-      name
+      status, name, content, hits
     })
 
     ctx.body = {
@@ -296,19 +296,18 @@ export class ArchiveTagController {
   static async Update (ctx: Router.RouterContext) {
     const {
       id,
-      name
+      status, name, content, hits
     } = ctx.request.body
-    const vtinfo = await ArchiveTag.findByPk(id)
-    if (vtinfo == null) {
+
+    const atinfo = await ArchiveTag.findByPk(id)
+    if (atinfo == null) {
       ctx.status = 400
       ctx.body = { message: 'ID不存在' }
       return
     }
 
-    if (vtinfo.name !== name) {
-      vtinfo.name = name
-    }
-    await vtinfo.save()
+    atinfo.update({ status, name, content, hits })
+
     ctx.body = { message: '修改完成' }
   }
 

@@ -28,7 +28,7 @@ export class ArchiveTag extends Model {
           type: DataTypes.TEXT('medium'),
           comment: '简介'
         },
-        hit: {
+        hits: {
           type: DataTypes.INTEGER.UNSIGNED,
           allowNull: false,
           defaultValue: 0,
