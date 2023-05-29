@@ -29,17 +29,17 @@ export class ArchiveListController {
   }
 
   /**
-   * 新增转码配置
+   * 新增资料列表
    */
   static async Add (ctx: Router.RouterContext) {
     const {
-      pic,
-      status, name, sub, total, year, lang, area, content
+      archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
     } = ctx.request.body
     // 首先验证图片
     const picBuffer = await ArchiveListController.downPic(pic)
+
     const data = await ArchiveList.create({
-      status, name, sub, total, year, lang, area, content
+      archiveCategoryId, status, name, sub, total, year, lang, area, content
     })
     // 处理图片保存路径
     const newPic = `data/pic/${data.id}/${randomUUID()}.jpg`
@@ -54,7 +54,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 转码配置列表
+   * 列表
    */
   static async List (ctx: Router.RouterContext) {
     const query = ctx.request.query
@@ -86,11 +86,6 @@ export class ArchiveListController {
       data: rows,
       total: count
     }
-
-    ctx.body = {
-      data: rows,
-      total: count
-    }
   }
 
   /**
@@ -98,8 +93,8 @@ export class ArchiveListController {
    */
   static async Update (ctx: Router.RouterContext) {
     const {
-      id, pic,
-      status, name, sub, total, year, lang, area, content
+      id,
+      archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
     } = ctx.request.body
     const alinfo = await ArchiveList.findByPk(id)
     if (alinfo == null) {
@@ -114,7 +109,7 @@ export class ArchiveListController {
     }
 
     await alinfo.update({
-      pic: newPic, status, name, sub, total, year, lang, area, content
+      pic: newPic, archiveCategoryId, status, name, sub, total, year, lang, area, content
     })
 
     await alinfo.save()
@@ -142,8 +137,8 @@ export class ArchiveListController {
  * 分类
  */
 export class ArchiveCategoryController {
-/**
-   * 新增转码配置
+  /**
+   * 新增
    */
   static async Add (ctx: Router.RouterContext) {
     const {
@@ -167,7 +162,7 @@ export class ArchiveCategoryController {
   }
 
   /**
-   * 转码配置列表
+   * 列表
    */
   static async List (ctx: Router.RouterContext) {
     const query = ctx.request.query
@@ -244,7 +239,7 @@ export class ArchiveCategoryController {
  */
 export class ArchiveTagController {
   /**
-   * 新增转码配置
+   * 新增
    */
   static async Add (ctx: Router.RouterContext) {
     const {
@@ -261,7 +256,7 @@ export class ArchiveTagController {
   }
 
   /**
-   * 转码配置列表
+   * 列表
    */
   static async List (ctx: Router.RouterContext) {
     const query = ctx.request.query
@@ -306,7 +301,7 @@ export class ArchiveTagController {
       return
     }
 
-    atinfo.update({ status, name, content, hits })
+    await atinfo.update({ status, name, content, hits })
 
     ctx.body = { message: '修改完成' }
   }
