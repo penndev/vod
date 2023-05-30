@@ -60,10 +60,33 @@ export class ArchiveListController {
     const query = ctx.request.query
     const page = parseNumber(query.page, 1)
     const limit = parseNumber(query.limit, 20)
+    const updateStart = query.updateStart ?? ''
+    const updateEnd = query.updateEnd ?? ''
 
     const where: WhereOptions = {}
     if (query.name) {
       where.name = { [Op.like]: '%' + query.name + '%' }
+    }
+
+    if (query.id) {
+      where.id = query.id
+    }
+
+    if (query.status) {
+      where.status = query.status
+    }
+
+    if (updateStart.length > 0 && updateEnd.length > 0) {
+      where.updatedAt = {
+        [Op.and]: [
+          { [Op.gt]: updateStart },
+          { [Op.lt]: updateEnd }
+        ]
+      }
+    } else if (updateStart.length > 0) {
+      where.updatedAt = { [Op.gt]: updateStart }
+    } else if (updateEnd.length > 0) {
+      where.updatedAt = { [Op.lt]: updateEnd }
     }
 
     let order: Order = []
