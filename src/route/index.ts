@@ -70,6 +70,8 @@ router.get('/dashboard', vodDashBoard)
   router.put('/archive/list', ArchiveListController.Update)
   router.delete('/archive/list', ArchiveListController.Delete)
 
+  router.post('/archive/list/tag', ArchiveListController.AddTag)
+  router.delete('/archive/list/tag', ArchiveListController.DeleteTag)
   // 编辑类别
   router.post('/archive/category', ArchiveCategoryController.Add)
   router.get('/archive/category', ArchiveCategoryController.List)

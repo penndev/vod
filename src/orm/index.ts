@@ -57,7 +57,6 @@ ArchiveTagMap.initial({ sequelize, underscored: true })
 // *** 处理关联联系
 ArchiveList.belongsTo(ArchiveCategory, { constraints: false })
 ArchiveTagMap.belongsTo(ArchiveTag, { constraints: false })
-ArchiveTagMap.belongsTo(ArchiveList, { constraints: false })
 
 /**
  * 开发环境自动同步表结构，并进行打印。

@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { ismkdir, parseNumber } from '../util/index.js'
 import { Op, Order, WhereOptions } from 'sequelize'
-import { ArchiveCategory, ArchiveList, ArchiveTag } from '../orm/index.js'
+import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from '../orm/index.js'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import sharp from 'sharp'
@@ -14,7 +14,7 @@ export class ArchiveListController {
   /**
    * 下载封面图片并格式化为jpeg
    */
-  static async downPic (pic:string) {
+  static async downPic (pic: string) {
     const iresult = await axios.get(pic, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
@@ -102,9 +102,18 @@ export class ArchiveListController {
     })
 
     const host = `${ctx.request.protocol}://${ctx.request.host}`
-    rows.forEach(vf => {
-      vf.setDataValue('Pic', host + '/' + vf.pic)
-    })
+    for (const al of rows) {
+      al.setDataValue('Pic', al.pic ? host + '/' + al.pic : null)
+      al.setDataValue('Tags', await ArchiveTagMap.findAll({
+        where: { archiveListId: al.id },
+        attributes: ['id'],
+        include: {
+          model: ArchiveTag,
+          attributes: ['name']
+        }
+      }))
+    }
+
     ctx.body = {
       data: rows,
       total: count
@@ -153,6 +162,41 @@ export class ArchiveListController {
     await data.destroy()
     ctx.status = 200
     ctx.body = { message: data.name + '删除成功' }
+  }
+
+  /**
+   * 新增资料列表
+   */
+  static async AddTag (ctx: Router.RouterContext) {
+    const {
+      archiveTagId, archiveListId
+    } = ctx.request.body
+
+    const data = await ArchiveTagMap.create({
+      archiveTagId, archiveListId
+    })
+    await data.save()
+
+    ctx.body = {
+      data,
+      message: '添加成功'
+    }
+  }
+
+  /**
+   * 删除媒体文件
+   */
+  static async DeleteTag (ctx: Router.RouterContext) {
+    const id = ctx.request.query.id
+    const data = await ArchiveTagMap.findByPk(Number(id))
+    if (data === null) {
+      ctx.status = 400
+      ctx.body = { message: '数据不存在' }
+      return
+    }
+    await data.destroy()
+    ctx.status = 200
+    ctx.body = { message: '删除成功' }
   }
 }
 
