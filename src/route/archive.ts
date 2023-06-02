@@ -1,6 +1,6 @@
 import Router from '@koa/router'
 import { ismkdir, parseNumber } from '../util/index.js'
-import { Op, Order, WhereOptions } from 'sequelize'
+import { Op, Order, WhereOptions, where } from 'sequelize'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from '../orm/index.js'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
@@ -171,6 +171,12 @@ export class ArchiveListController {
     const {
       archiveTagId, archiveListId
     } = ctx.request.body
+    // 判断是否存在
+    if (await ArchiveTagMap.findOne({ where: { archiveTagId, archiveListId } }) !== null) {
+      ctx.status = 400
+      ctx.body = { message: '已存在标签' }
+      return
+    }
 
     const data = await ArchiveTagMap.create({
       archiveTagId, archiveListId
