@@ -1,6 +1,6 @@
 import Router from '@koa/router'
 import { ismkdir, parseNumber } from '../util/index.js'
-import { Op, Order, WhereOptions, where } from 'sequelize'
+import { Op, Order, WhereOptions } from 'sequelize'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from '../orm/index.js'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
