@@ -54,7 +54,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 列表
+   * 获取资料列表
    */
   static async List (ctx: Router.RouterContext) {
     const query = ctx.request.query
@@ -121,7 +121,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 修改文件内容
+   * 修改资料内容
    */
   static async Update (ctx: Router.RouterContext) {
     const {
@@ -149,7 +149,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 删除媒体文件
+   * 删除资料内容
    */
   static async Delete (ctx: Router.RouterContext) {
     const id = ctx.request.query.id
@@ -165,7 +165,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 新增资料列表
+   * 将已存在的条目增加标签属性
    */
   static async AddTag (ctx: Router.RouterContext) {
     const {
@@ -190,7 +190,7 @@ export class ArchiveListController {
   }
 
   /**
-   * 删除媒体文件
+   * 删除某个资料的标签内容
    */
   static async DeleteTag (ctx: Router.RouterContext) {
     const id = ctx.request.query.id
