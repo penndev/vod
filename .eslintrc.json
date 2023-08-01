@@ -13,7 +13,8 @@
     ],
     "rules": {
         // 在此处添加或覆盖规则
-        "no-lone-blocks": "off"
+        "no-lone-blocks": "off",
+        "indent": ["error", 4]
     },
     "settings": {
         "import/resolver": {

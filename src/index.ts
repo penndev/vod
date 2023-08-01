@@ -21,22 +21,22 @@ app.use(adminRoute('/api'))
 app.use(mount('/data', './data'))
 
 if (config.mode === 'dev') {
-  app.use(bull('/bull'))
+    app.use(bull('/bull'))
 }
 
 app.on('error', (err) => {
-  if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
+    if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
     // tcp客户端关闭 koa不对tcp层做处理
-  } else {
-    console.error(err)
-  }
+    } else {
+        console.error(err)
+    }
 })
 
 const srv = app.listen(config.port, config.host)
 
 srv.on('listening', () => {
-  const srvAddr = srv.address() as AddressInfo
-  for (const item of networks(srvAddr.address)) {
-    console.log('\x1b[34mOPEN Brower\x1b[1;33m -> \x1b[0;32mhttp://%s:%s\x1b[0m', item.address, srvAddr.port)
-  }
+    const srvAddr = srv.address() as AddressInfo
+    for (const item of networks(srvAddr.address)) {
+        console.log('\x1b[34mOPEN Brower\x1b[1;33m -> \x1b[0;32mhttp://%s:%s\x1b[0m', item.address, srvAddr.port)
+    }
 })

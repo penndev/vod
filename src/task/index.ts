@@ -7,15 +7,15 @@ const serverAdapter = new KoaAdapter()
 
 // 队列添加到仪表盘
 createBullBoard({
-  queues: [
-    new BullAdapter(transcodeTask)
-  ],
-  serverAdapter
+    queues: [
+        new BullAdapter(transcodeTask)
+    ],
+    serverAdapter
 })
 
 export {
-  serverAdapter,
-  transcodeTask,
+    serverAdapter,
+    transcodeTask,
 
-  transcodeTaskData
+    transcodeTaskData
 }

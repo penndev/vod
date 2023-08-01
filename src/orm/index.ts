@@ -8,12 +8,12 @@ import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from './archi
  * 并对连通性进行测试
  */
 const sequelize = new Sequelize(config.dbParse, {
-  timezone: '+08:00',
-  dialectOptions: {
-    dateStrings: true,
-    typeCast: true
-  },
-  logging: false
+    timezone: '+08:00',
+    dialectOptions: {
+        dateStrings: true,
+        typeCast: true
+    },
+    logging: false
 })
 await sequelize.authenticate()
 
@@ -62,20 +62,20 @@ ArchiveTagMap.belongsTo(ArchiveTag, { constraints: false })
  * 开发环境自动同步表结构，并进行打印。
  */
 if (config.mode === 'dev') {
-  await sequelize.sync({ alter: true })
+    await sequelize.sync({ alter: true })
 }
 
 export {
-  AdminUser,
-  AdminRole,
-  AdminAccesslog,
-  // - 分组
-  VideoFile,
-  VideoTranscode,
-  VideoTask,
-  // - 分组
-  ArchiveCategory,
-  ArchiveList,
-  ArchiveTag,
-  ArchiveTagMap
+    AdminUser,
+    AdminRole,
+    AdminAccesslog,
+    // - 分组
+    VideoFile,
+    VideoTranscode,
+    VideoTask,
+    // - 分组
+    ArchiveCategory,
+    ArchiveList,
+    ArchiveTag,
+    ArchiveTagMap
 }
