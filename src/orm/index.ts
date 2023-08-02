@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
-import { AdminAccesslog, AdminUser, AdminRole, VideoFile, VideoTranscode, VideoTask } from './model.js'
+import { VideoFile, VideoTranscode, VideoTask } from './video.js'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from './archive.js'
-
+import { AdminAccesslog, AdminUser, AdminRole } from './system.js'
 /**
  * 数据库连接实例
  * 并对连通性进行测试
@@ -13,7 +13,7 @@ const sequelize = new Sequelize(config.dbParse, {
         dateStrings: true,
         typeCast: true
     },
-    logging: false
+    logging: config.mode === 'dev'
 })
 await sequelize.authenticate()
 

@@ -192,7 +192,6 @@ export class VideoFileController {
      * 修改文件内容
      */
     static async Update (ctx: Router.RouterContext) {
-    // const id = parseNumber(ctx.request.body.id,0)
         const { id, fileName } = ctx.request.body
         const mediaInfo = await VideoFile.findByPk(id)
         if (mediaInfo == null) {

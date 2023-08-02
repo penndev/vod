@@ -1,7 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import config from '../config/index.js'
-import { VideoTask } from '../orm/model.js'
+import { VideoTask } from '../orm/index.js'
 import { parse, resolve } from 'path'
 import { getFolderSize } from '../util/index.js'
 

@@ -12,8 +12,8 @@ import { writeFileSync } from 'fs'
  */
 export class ArchiveListController {
     /**
-   * 下载封面图片并格式化为jpeg
-   */
+     * 下载封面图片并格式化为jpeg
+     */
     static async downPic (pic: string) {
         const iresult = await axios.get(pic, {
             headers: {
@@ -29,8 +29,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 新增资料列表
-   */
+     * 新增资料列表
+     */
     static async Add (ctx: Router.RouterContext) {
         const {
             archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
@@ -54,8 +54,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 获取资料列表
-   */
+     * 获取资料列表
+     */
     static async List (ctx: Router.RouterContext) {
         const query = ctx.request.query
         const page = parseNumber(query.page, 1)
@@ -121,8 +121,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 修改资料内容
-   */
+     * 修改资料内容
+     */
     static async Update (ctx: Router.RouterContext) {
         const {
             id,
@@ -149,8 +149,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 删除资料内容
-   */
+     * 删除资料内容
+     */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const data = await ArchiveList.findByPk(Number(id))
@@ -165,8 +165,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 将已存在的条目增加标签属性
-   */
+     * 将已存在的条目增加标签属性
+     */
     static async AddTag (ctx: Router.RouterContext) {
         const {
             archiveTagId, archiveListId
@@ -190,8 +190,8 @@ export class ArchiveListController {
     }
 
     /**
-   * 删除某个资料的标签内容
-   */
+     * 删除某个资料的标签内容
+     */
     static async DeleteTag (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const data = await ArchiveTagMap.findByPk(Number(id))
@@ -211,8 +211,8 @@ export class ArchiveListController {
  */
 export class ArchiveCategoryController {
     /**
-   * 新增
-   */
+     * 新增
+     */
     static async Add (ctx: Router.RouterContext) {
         const {
             parent, status, name, content, order
@@ -235,8 +235,8 @@ export class ArchiveCategoryController {
     }
 
     /**
-   * 列表
-   */
+     * 列表
+     */
     static async List (ctx: Router.RouterContext) {
         const query = ctx.request.query
         const page = parseNumber(query.page, 1)
@@ -265,8 +265,8 @@ export class ArchiveCategoryController {
     }
 
     /**
-   * 修改文件内容
-   */
+     * 修改文件内容
+     */
     static async Update (ctx: Router.RouterContext) {
         const {
             id,
@@ -291,8 +291,8 @@ export class ArchiveCategoryController {
     }
 
     /**
-   * 删除媒体文件
-   */
+     * 删除媒体文件
+     */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const data = await ArchiveCategory.findByPk(Number(id))
@@ -312,8 +312,8 @@ export class ArchiveCategoryController {
  */
 export class ArchiveTagController {
     /**
-   * 新增
-   */
+     * 新增
+     */
     static async Add (ctx: Router.RouterContext) {
         const {
             status, name, content, hits
@@ -329,8 +329,8 @@ export class ArchiveTagController {
     }
 
     /**
-   * 列表
-   */
+     * 列表
+     */
     static async List (ctx: Router.RouterContext) {
         const query = ctx.request.query
         const page = parseNumber(query.page, 1)
@@ -359,8 +359,8 @@ export class ArchiveTagController {
     }
 
     /**
-   * 修改文件内容
-   */
+     * 修改文件内容
+     */
     static async Update (ctx: Router.RouterContext) {
         const {
             id,
@@ -380,8 +380,8 @@ export class ArchiveTagController {
     }
 
     /**
-   * 删除媒体文件
-   */
+     * 删除媒体文件
+     */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
         const data = await ArchiveTag.findByPk(Number(id))
