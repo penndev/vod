@@ -73,10 +73,6 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         return
     }
 
-    // console.log("----------------------------------------------------")
-    // console.log(ctx.req.url,ctx.URL.pathname,ctx.request.URL.pathname)
-    // console.log("----------------------------------------------------")
-
     // 判断是否需要进行接口鉴权
     if (adminInfo.adminRoleId !== 0) {
         const roleInfo = await AdminRole.findByPk(adminInfo.adminRoleId)

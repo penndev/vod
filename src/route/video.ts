@@ -12,11 +12,11 @@ import { ffprobeDataJson } from '../util/vod.js'
 
 /** 上传媒体文件 */
 interface uploadPart {
-    fid: number; // 存储文件ID
-    fpath: string; // 存储文件路径
-    fsize: number; // 文件总大小
-    urate: number; // 单分片大小,上传速率
-    ucount: number; // 已经上传了多少次
+    fid: number // 存储文件ID
+    fpath: string // 存储文件路径
+    fsize: number // 文件总大小
+    urate: number // 单分片大小,上传速率
+    ucount: number // 已经上传了多少次
 }
 
 /**
@@ -66,7 +66,7 @@ export class UploadMedia {
             urate: 5 * 1048576,
             ucount: 0
         }
-        redis.SET(cacheKey, JSON.stringify(partData), { EX: 86400 })
+        await redis.SET(cacheKey, JSON.stringify(partData), { EX: 86400 })
         ctx.body = partData
     }
 
