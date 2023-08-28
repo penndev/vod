@@ -123,26 +123,29 @@ export class UploadMedia {
                 return
             }
 
-            vf.status = -2
-            await vf.save()
-            const ffprobeData = await ffprobeDataJson(vf.filePath)
-            for (const item of ffprobeData.streams) {
-                if (item.codec_type === 'video') {
-                    vf.status = 1
-                    vf.videoDuration = parseNumber(item.duration, 0)
-
-                    let fps = 0
-                    const [f, s] = (item.r_frame_rate as string).split('/').map(Number)
-                    if (f && s) {
-                        fps = Math.floor(f / s)
+            try {
+                const ffprobeData = await ffprobeDataJson(vf.filePath)
+                for (const item of ffprobeData.streams) {
+                    if (item.codec_type === 'video') {
+                        vf.status = 1
+                        vf.videoDuration = parseNumber(item.duration, 0)
+                        let fps = 0
+                        const [f, s] = (item.r_frame_rate as string).split('/').map(Number)
+                        if (f && s) {
+                            fps = Math.floor(f / s)
+                        }
+                        vf.videoFps = fps
+                        vf.videoBitrate = parseNumber(item.bit_rate, 0)
+                        vf.videoWidth = parseNumber(item.width, 0)
+                        vf.videoHeight = parseNumber(item.height, 0)
                     }
-                    vf.videoFps = fps
-                    vf.videoBitrate = parseNumber(item.bit_rate, 0)
-                    vf.videoWidth = parseNumber(item.width, 0)
-                    vf.videoHeight = parseNumber(item.height, 0)
                 }
+                await vf.save()
+            } catch (error) {
+                vf.status = -2
+                await vf.save()
+                throw Error('视频信息识别失败')
             }
-            await vf.save()
         }
         ctx.body = {
             message: 'ok'
