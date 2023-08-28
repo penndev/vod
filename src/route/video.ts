@@ -4,7 +4,7 @@ import { WhereOptions, Op, Order } from 'sequelize'
 
 import { VideoFile, VideoTranscode, VideoTask } from '../orm/index.js'
 import { File } from 'formidable'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { transcodeTask, transcodeTaskData } from '../task/index.js'
 import { ismkdir, isunlink, md5laragefile, parseNumber } from '../util/index.js'
 import { dirname, join } from 'path/posix'
@@ -95,9 +95,11 @@ export class UploadMedia {
             ctx.body = { message: 'currentPart失败' }
             return
         }
-        const reader = readFileSync((uploadData as File).filepath)
+        const uploadFilePath = (uploadData as File).filepath
+        const reader = readFileSync(uploadFilePath)
         await ismkdir(partData.fpath)
         writeFileSync(partData.fpath, reader, { flag: 'a+' })
+        unlinkSync(uploadFilePath) // 删除临时文件，某些系统不会自己删除。
         partData.ucount = parseInt(currentPart) + 1
         await redis.SET(cacheKey, JSON.stringify(partData), { EX: 86400 })
 
@@ -122,6 +124,7 @@ export class UploadMedia {
             }
 
             vf.status = -2
+            await vf.save()
             const ffprobeData = await ffprobeDataJson(vf.filePath)
             for (const item of ffprobeData.streams) {
                 if (item.codec_type === 'video') {
