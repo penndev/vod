@@ -53,15 +53,3 @@ a vod codec cms
 
 [ffmpeg](https://ffmpeg.org)
 > 转码依赖于ffmpeg工具必须保证你运行代码的机器已经安装并可以执行ffmpeg命令和ffprobe命令
-
-## 常用命令
-
-- ffmpeg mp4转码为hls
-
-> `ffmpeg -i in.mp4 -vcodec libx264 -acodec aac -hls_list_size 0 -hls_time 30 -hls_enc 1 -hls_enc_key 0123456789abcdef out.m3u8`
-
-- hls标签备注
-
-> `#EXT-X-DISCONTINUITY` -声明不连续
-
-> `#EXT-X-KEY:METHOD=NONE` -声明不加密
