@@ -6,7 +6,7 @@ import { VideoFile, VideoTranscode, VideoTask } from '../orm/index.js'
 import { File } from 'formidable'
 import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { transcodeTask, transcodeTaskData } from '../task/index.js'
-import { ismkdir, isunlink, md5laragefile, parseNumber } from '../util/index.js'
+import { isMkdir, isUnlink, md5LargeFile, parseNumber } from '../util/index.js'
 import { dirname, join } from 'path/posix'
 import { ffprobeDataJson } from '../util/vod.js'
 
@@ -58,7 +58,7 @@ export class UploadMedia {
             filePath: `data/video/${data.fileMd5.slice(0, 3)}/${data.fileMd5}/${data.fileName}`
         })
         // 清理掉历史遗留文件
-        await isunlink(data.filePath)
+        await isUnlink(data.filePath)
         const partData: uploadPart = {
             fid: data.id,
             fpath: data.filePath,
@@ -97,7 +97,7 @@ export class UploadMedia {
         }
         const uploadFilePath = (uploadData as File).filepath
         const reader = readFileSync(uploadFilePath)
-        await ismkdir(partData.fpath)
+        await isMkdir(partData.fpath)
         writeFileSync(partData.fpath, reader, { flag: 'a+' })
         unlinkSync(uploadFilePath) // 删除临时文件，某些系统不会自己删除。
         partData.ucount = parseInt(currentPart) + 1
@@ -113,7 +113,7 @@ export class UploadMedia {
                 return
             }
             // 超过10G的文件可能会造成请求超时。
-            const md5 = await md5laragefile(vf.filePath)
+            const md5 = await md5LargeFile(vf.filePath)
             if (vf.fileMd5 !== md5) {
                 vf.status = -1
                 await vf.save()
@@ -431,7 +431,7 @@ export class VideoTaskController {
         })
         task.outFile = join(dirname(file.filePath), `${task.id}/index.${transcode.format}`)
         await task.save()
-        await ismkdir(task.outFile)
+        await isMkdir(task.outFile)
 
         const finput:transcodeTaskData = {
             inputFile: file?.filePath,

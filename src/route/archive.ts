@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { ismkdir, parseNumber } from '../util/index.js'
+import { isMkdir, parseNumber } from '../util/index.js'
 import { Op, Order, WhereOptions } from 'sequelize'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from '../orm/index.js'
 import axios from 'axios'
@@ -15,15 +15,15 @@ export class ArchiveListController {
      * 下载封面图片并格式化为jpeg
      */
     static async downPic (pic: string) {
-        const iresult = await axios.get(pic, {
+        const result = await axios.get(pic, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
             },
             timeout: 30 * 1000,
             responseType: 'arraybuffer'
         })
-        if (iresult.status === 200 && iresult.data) {
-            return await sharp(iresult.data).toFormat('jpeg').toBuffer()
+        if (result.status === 200 && result.data) {
+            return await sharp(result.data).toFormat('jpeg').toBuffer()
         }
         throw Error('获取图片失败')
     }
@@ -43,7 +43,7 @@ export class ArchiveListController {
         })
         // 处理图片保存路径
         const newPic = `data/pic/${data.id}/${randomUUID()}.jpg`
-        await ismkdir(newPic)
+        await isMkdir(newPic)
         writeFileSync(newPic, picBuffer)
         data.pic = newPic
         await data.save()

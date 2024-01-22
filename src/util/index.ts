@@ -32,17 +32,17 @@ export const getFolderSize = (folderPath:string) :number => {
  * @param p 文件路径
  * @returns 32位的md5 hex
  */
-export const md5laragefile = (p :string) => {
+export const md5LargeFile = (p :string) => {
     return new Promise<string>((resolve, reject) => {
         const md5sum = crypto.createHash('md5')
-        const filestream = createReadStream(p)
-        filestream.on('data', (dataChunk) => {
+        const fileStream = createReadStream(p)
+        fileStream.on('data', (dataChunk) => {
             md5sum.update(dataChunk)
         })
-        filestream.on('end', () => {
+        fileStream.on('end', () => {
             resolve(md5sum.digest('hex'))
         })
-        filestream.on('error', (err) => {
+        fileStream.on('error', (err) => {
             reject(err)
         })
     })
@@ -53,7 +53,7 @@ export const md5laragefile = (p :string) => {
  * @param filepath
  * @returns
  */
-export const ismkdir = async (filepath: string) => {
+export const isMkdir = async (filepath: string) => {
     const dir = parse(filepath).dir
     if (!existsSync(dir)) {
         mkdirSync(dir, { recursive: true })
@@ -65,7 +65,7 @@ export const ismkdir = async (filepath: string) => {
  * @param filepath
  * @returns
  */
-export const isunlink = (filepath: string) => {
+export const isUnlink = (filepath: string) => {
     return new Promise((resolve, reject) => {
         try {
             if (existsSync(filepath)) {
@@ -94,7 +94,7 @@ export const md5 = (s: string) => {
  * @param length
  * @returns
  */
-export const randomstr = (length: number) => {
+export const randomStr = (length: number) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     let result = ''
     for (let i = 0; i < length; i++) {
