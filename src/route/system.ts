@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../redis/index.js'
 import { randomUUID } from 'crypto'
-import { AdminUser, AdminAccesslog, AdminRole } from '../orm/index.js'
+import { AdminUser, AdminAccessLog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import config from '../config/index.js'
 import Bcrypt from 'bcrypt'
@@ -224,7 +224,7 @@ export class AdminController {
             }
         }
 
-        const { rows, count } = await AdminAccesslog.findAndCountAll({
+        const { rows, count } = await AdminAccessLog.findAndCountAll({
             offset, limit, where, order, include: [{ model: AdminUser }]
         })
         ctx.body = {

@@ -85,7 +85,7 @@ class AdminRole extends Model {
 /**
  * 权限访问日志
  */
-class AdminAccesslog extends Model {
+class AdminAccessLog extends Model {
     declare id: number
     declare createdAt: Date
     declare updatedAt: Date
@@ -131,5 +131,5 @@ class AdminAccesslog extends Model {
 export {
     AdminUser,
     AdminRole,
-    AdminAccesslog
+    AdminAccessLog
 }

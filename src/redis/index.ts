@@ -6,7 +6,6 @@ const redis = createClient({
 })
 
 redis.on('error', (err) => {
-    // console.log('redis connection fail[ %s ]', err)
     throw err
 })
 

@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
 import { VideoFile, VideoTranscode, VideoTask } from './video.js'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from './archive.js'
-import { AdminAccesslog, AdminUser, AdminRole } from './system.js'
+import { AdminAccessLog, AdminUser, AdminRole } from './system.js'
 /**
  * 数据库连接实例
  * 并对连通性进行测试
@@ -13,22 +13,23 @@ const sequelize = new Sequelize(config.dbParse, {
         dateStrings: true,
         typeCast: true
     },
-    logging: config.mode === 'dev'
+    logging: config.mode === 'dev' ? false : console.log
 })
+
 await sequelize.authenticate()
 
 /**
  * 系统管理默认表
  * @param AdminUser 系统管理员
  * @param AdminRole 系统权限
- * @param AdminAccesslog 系统访问日志表
+ * @param AdminAccessLog 系统访问日志表
  */
 AdminUser.initial({ sequelize, underscored: true })
 AdminRole.initial({ sequelize, underscored: true })
-AdminAccesslog.initial({ sequelize, underscored: true })
+AdminAccessLog.initial({ sequelize, underscored: true })
 // *** 处理关联联系
 AdminUser.belongsTo(AdminRole, { constraints: false })
-AdminAccesslog.belongsTo(AdminUser, { constraints: false })
+AdminAccessLog.belongsTo(AdminUser, { constraints: false })
 
 /**
  * 视频管理默认表
@@ -68,7 +69,7 @@ if (config.mode === 'dev') {
 export {
     AdminUser,
     AdminRole,
-    AdminAccesslog,
+    AdminAccessLog,
     // - 分组
     VideoFile,
     VideoTranscode,

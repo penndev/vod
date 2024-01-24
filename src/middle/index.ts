@@ -4,7 +4,7 @@ import config from '../config/index.js'
 import mime from 'mime'
 import { Next } from 'koa'
 import { koaBody } from 'koa-body'
-import { AdminAccesslog, AdminUser, AdminRole } from '../orm/index.js'
+import { AdminAccessLog, AdminUser, AdminRole } from '../orm/index.js'
 import { serverAdapter } from '../task/index.js'
 import { createReadStream, existsSync, statSync } from 'fs'
 import { parseNumber } from '../util/index.js'
@@ -107,7 +107,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
    * 处理记录什么类型的日志，如果什么都记录会数据过大
    */
     if (ctx.request.method in ['POST', 'DELETE']) {
-        await AdminAccesslog.create({
+        await AdminAccessLog.create({
             adminUserId: adminInfo.id,
             path: ctx.request.path,
             method: ctx.request.method,
