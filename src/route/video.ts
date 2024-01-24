@@ -5,7 +5,7 @@ import { WhereOptions, Op, Order } from 'sequelize'
 import { VideoFile, VideoTranscode, VideoTask } from '../orm/index.js'
 import { File } from 'formidable'
 import { readFileSync, unlinkSync, writeFileSync } from 'fs'
-import { transcodeTask, transcodeTaskData } from '../task/index.js'
+import { transcodeTask } from '../task/index.js'
 import { isMkdir, isUnlink, md5LargeFile, parseNumber } from '../util/index.js'
 import { dirname, join } from 'path/posix'
 import { ffprobeDataJson } from '../util/vod.js'
@@ -432,14 +432,15 @@ export class VideoTaskController {
         task.outFile = join(dirname(file.filePath), `${task.id}/index.${transcode.format}`)
         await task.save()
         await isMkdir(task.outFile)
-
-        const finput:transcodeTaskData = {
-            inputFile: file?.filePath,
-            options,
-            outPutFile: task.outFile,
-            taskId: task.id
-        }
-        const jobInfo = await transcodeTask.add(finput, { attempts: 0 })
+        const jobInfo = await transcodeTask.add(
+            {
+                inputFile: file?.filePath,
+                options,
+                outPutFile: task.outFile,
+                taskId: task.id
+            },
+            { attempts: 0 }
+        )
         redis.set(`task:progress:${task.id}`, jobInfo.id, { EX: 86400 })
         ctx.body = {
             message: '提交完成',

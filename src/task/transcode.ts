@@ -12,8 +12,6 @@ interface transcodeTaskData {
     taskId: number
 }
 
-const transcodeTask = new Queue('FFmpeg Task', config.redisParse)
-
 const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, done) => {
     const jobData = job.data as transcodeTaskData
     const inputFile = resolve(job.data.inputFile)
@@ -41,6 +39,8 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
     transcoding.run()
 }
 
+const transcodeTask: Queue.Queue<transcodeTaskData> = new Queue('FFmpeg Task', config.redisParse)
+
 /**
  * 队列执行函数进行挂载
  * 如果挂载后任务将在当前线程后台执行。如果报错可能导致当前线程崩溃
@@ -49,6 +49,5 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
 transcodeTask.process(callBack)
 
 export {
-    transcodeTask,
-    transcodeTaskData
+    transcodeTask
 }

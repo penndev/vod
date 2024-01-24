@@ -1,7 +1,7 @@
 import { KoaAdapter } from '@bull-board/koa'
 import { BullAdapter } from '@bull-board/api/bullAdapter.js'
 import { createBullBoard } from '@bull-board/api'
-import { transcodeTask, transcodeTaskData } from './transcode.js'
+import { transcodeTask } from './transcode.js'
 
 const serverAdapter = new KoaAdapter()
 
@@ -15,7 +15,5 @@ createBullBoard({
 
 export {
     serverAdapter,
-    transcodeTask,
-
-    transcodeTaskData
+    transcodeTask
 }
