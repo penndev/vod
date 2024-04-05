@@ -23,7 +23,7 @@ export class ArchiveListController {
             responseType: 'arraybuffer'
         })
         if (result.status === 200 && result.data) {
-            return await sharp(result.data).toFormat('jpeg').toBuffer()
+            return await sharp(result.data).withMetadata().jpeg({ quality: 100 }).toBuffer()
         }
         throw Error('获取图片失败')
     }
