@@ -18,15 +18,24 @@ const sequelize = new Sequelize(config.dbParse, {
 
 await sequelize.authenticate()
 
+const initOptions = {
+    // 数据库实例
+    sequelize,
+    // 下划线代替驼峰
+    underscored: true,
+    // 软删除
+    paranoid: true
+}
+
 /**
  * 系统管理默认表
  * @param AdminUser 系统管理员
  * @param AdminRole 系统权限
  * @param AdminAccessLog 系统访问日志表
  */
-AdminUser.initial({ sequelize, underscored: true })
-AdminRole.initial({ sequelize, underscored: true })
-AdminAccessLog.initial({ sequelize, underscored: true })
+AdminUser.initial(initOptions)
+AdminRole.initial(initOptions)
+AdminAccessLog.initial(initOptions)
 // *** 处理关联联系
 AdminUser.belongsTo(AdminRole, { constraints: false })
 AdminAccessLog.belongsTo(AdminUser, { constraints: false })
@@ -37,9 +46,9 @@ AdminAccessLog.belongsTo(AdminUser, { constraints: false })
  * @param VideoTranscode ffmpeg编码器
  * @param VideoTask 视频转码列表
  */
-VideoFile.initial({ sequelize, underscored: true })
-VideoTranscode.initial({ sequelize, underscored: true })
-VideoTask.initial({ sequelize, underscored: true })
+VideoFile.initial(initOptions)
+VideoTranscode.initial(initOptions)
+VideoTask.initial(initOptions)
 // *** 处理关联联系
 VideoTask.belongsTo(VideoFile, { constraints: false })
 VideoTask.belongsTo(VideoTranscode, { constraints: false })
@@ -51,10 +60,10 @@ VideoTask.belongsTo(VideoTranscode, { constraints: false })
  * @param ArchiveTag 标签表
  * @param ArchiveTagMap 标签资料映射表
  */
-ArchiveList.initial({ sequelize, underscored: true })
-ArchiveCategory.initial({ sequelize, underscored: true })
-ArchiveTag.initial({ sequelize, underscored: true })
-ArchiveTagMap.initial({ sequelize, underscored: true })
+ArchiveList.initial(initOptions)
+ArchiveCategory.initial(initOptions)
+ArchiveTag.initial(initOptions)
+ArchiveTagMap.initial(initOptions)
 // *** 处理关联联系
 ArchiveList.belongsTo(ArchiveCategory, { constraints: false })
 ArchiveTagMap.belongsTo(ArchiveTag, { constraints: false })

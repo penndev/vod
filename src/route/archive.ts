@@ -301,6 +301,16 @@ export class ArchiveCategoryController {
             ctx.body = { message: '数据不存在' }
             return
         }
+        const childItem = await ArchiveCategory.findOne({
+            where: {
+                parent: id
+            }
+        })
+        if (childItem !== null) {
+            ctx.status = 400
+            ctx.body = { message: '请先处理下级分类' }
+            return
+        }
         await data.destroy()
         ctx.status = 200
         ctx.body = { message: data.name + '删除成功' }
