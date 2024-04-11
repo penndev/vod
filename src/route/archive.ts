@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { isMkdir, parseNumber } from '../util/index.js'
+import { isMkdir, isUnlink, parseNumber } from '../util/index.js'
 import { Op, Order, WhereOptions } from 'sequelize'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from '../orm/index.js'
 import axios from 'axios'
@@ -14,8 +14,8 @@ export class ArchiveListController {
     /**
      * 下载封面图片并格式化为jpeg
      */
-    static async downPic (pic: string) {
-        const result = await axios.get(pic, {
+    static async downPic (picUri: string) {
+        const result = await axios.get(picUri, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
             },
@@ -35,6 +35,7 @@ export class ArchiveListController {
         const {
             archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
         } = ctx.request.body
+
         // 首先验证图片
         const picBuffer = await ArchiveListController.downPic(pic)
 
@@ -46,6 +47,7 @@ export class ArchiveListController {
         await isMkdir(newPic)
         writeFileSync(newPic, picBuffer)
         data.pic = newPic
+
         await data.save()
 
         ctx.body = {
@@ -124,27 +126,28 @@ export class ArchiveListController {
      * 修改资料内容
      */
     static async Update (ctx: Router.RouterContext) {
-        const {
-            id,
-            archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
+        let {
+            id, archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
         } = ctx.request.body
-        const alinfo = await ArchiveList.findByPk(id)
-        if (alinfo == null) {
+        const ALinfo = await ArchiveList.findByPk(id)
+        if (ALinfo == null) {
             ctx.status = 400
             ctx.body = { message: 'ID不存在' }
             return
         }
-        let newPic = pic
-        if (alinfo.pic !== newPic) {
-            newPic = 'newPic'
-            console.log('// 处理图片')
+        // 更新封面操作
+        if (pic && (pic.startsWith('http://') || pic.startsWith('https://'))) {
+            const picBuffer = await ArchiveListController.downPic(pic)
+            pic = `data/pic/${ALinfo.id}/${randomUUID()}.jpg`
+            await isMkdir(pic)
+            writeFileSync(pic, picBuffer)
+            isUnlink(ALinfo.pic).catch(e => {
+                console.error(`isUnlink ${ALinfo.pic}`, e)
+            })
         }
-
-        await alinfo.update({
-            pic: newPic, archiveCategoryId, status, name, sub, total, year, lang, area, content
+        await ALinfo.update({
+            pic, archiveCategoryId, status, name, sub, total, year, lang, area, content
         })
-
-        await alinfo.save()
         ctx.body = { message: '修改完成' }
     }
 
