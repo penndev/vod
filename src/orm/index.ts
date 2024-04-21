@@ -13,7 +13,7 @@ const sequelize = new Sequelize(config.dbParse, {
         dateStrings: true,
         typeCast: true
     },
-    logging: config.mode === 'dev' ? false : console.log
+    logging: config.mode === 'dev' ? console.log : false
 })
 
 await sequelize.authenticate()

@@ -42,11 +42,13 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
 const transcodeTask: Queue.Queue<transcodeTaskData> = new Queue('FFmpeg Task', config.redisParse)
 
 /**
- * 队列执行函数进行挂载
+ * bull FFmpeg Task 队列执行函数进行挂载
  * 如果挂载后任务将在当前线程后台执行。如果报错可能导致当前线程崩溃
- * 请在专门的队列工作线程进行挂载
+ * 请在专门的队列工作线程进行挂载,防止造成进程退出
  */
-transcodeTask.process(callBack)
+if (config.mode === 'dev') {
+    transcodeTask.process(callBack)
+}
 
 export {
     transcodeTask
