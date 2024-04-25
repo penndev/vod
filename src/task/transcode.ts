@@ -14,6 +14,10 @@ interface transcodeTaskData {
 
 const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, done) => {
     const jobData = job.data as transcodeTaskData
+
+    // TODO
+    // 处理 任务状态，处理进程安全
+
     const inputFile = resolve(job.data.inputFile)
     const outPutFileParse = parse(resolve(jobData.outPutFile))
     const transcoding = ffmpeg({ cwd: outPutFileParse.dir })
@@ -29,11 +33,11 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
     })
     transcoding.on('end', async () => {
         const outSize = getFolderSize(outPutFileParse.dir) // 获取文件夹大小
-        VideoTask.update({ status: 1, outSize }, { where: { id: jobData.taskId } })
+        VideoTask.update({ status: 2, outSize }, { where: { id: jobData.taskId } })
         done()
     })
     transcoding.on('error', (err, stdout, stderr) => {
-        VideoTask.update({ status: -1 }, { where: { id: jobData.taskId } })
+        VideoTask.update({ status: -2 }, { where: { id: jobData.taskId } })
         done(new Error(`err:[${err}] \n  stdout:[${stdout}] \n stderr:[${stderr}]`))
     })
     transcoding.run()

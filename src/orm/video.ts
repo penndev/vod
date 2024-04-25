@@ -210,7 +210,7 @@ class VideoTask extends Model {
             status: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0,
-                comment: '0转码中 | 1成功'
+                comment: '-2失败|0提交中|1转码中|2完成'
             },
             outFile: {
                 type: DataTypes.STRING,
