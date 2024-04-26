@@ -1,7 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg'
 import Queue from 'bull'
 import config from '../config/index.js'
-import { VideoTask } from '../orm/index.js'
+import { sequelize, VideoTask } from '../orm/index.js'
 import { parse, resolve } from 'path'
 import { getFolderSize } from '../util/index.js'
 
@@ -15,8 +15,22 @@ interface transcodeTaskData {
 const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, done) => {
     const jobData = job.data as transcodeTaskData
 
-    // TODO
-    // 处理 任务状态，处理进程安全
+    // 处理 任务状态，处理并发安全
+    const status = await sequelize.transaction(async t => {
+        const vf = await VideoTask.findByPk(jobData.taskId, {
+            transaction: t,
+            lock: t.LOCK.UPDATE
+        })
+        if (vf?.status === 1) { // 已经在转码队列中
+            return false
+        }
+        VideoTask.update({ status: 1 }, { where: { id: jobData.taskId } })
+        return true
+    })
+    if (!status) {
+        done(new Error(`err:[${jobData.taskId}] status error\n`))
+        return
+    }
 
     const inputFile = resolve(job.data.inputFile)
     const outPutFileParse = parse(resolve(jobData.outPutFile))

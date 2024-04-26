@@ -76,6 +76,8 @@ if (config.mode === 'dev') {
 }
 
 export {
+    sequelize,
+
     AdminUser,
     AdminRole,
     AdminAccessLog,
