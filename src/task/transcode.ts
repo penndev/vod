@@ -15,16 +15,15 @@ interface transcodeTaskData {
 const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, done) => {
     const jobData = job.data as transcodeTaskData
 
-    // 处理 任务状态，处理并发安全
+    // 修改任务状态，处理并发安全
     const status = await sequelize.transaction(async t => {
         const vf = await VideoTask.findByPk(jobData.taskId, {
-            transaction: t,
             lock: t.LOCK.UPDATE
         })
         if (vf?.status === 1) { // 已经在转码队列中
             return false
         }
-        VideoTask.update({ status: 1 }, { where: { id: jobData.taskId } })
+        await VideoTask.update({ status: 1 }, { where: { id: jobData.taskId } })
         return true
     })
     if (!status) {
@@ -51,7 +50,7 @@ const callBack:Queue.ProcessCallbackFunction<transcodeTaskData> = async (job, do
         done()
     })
     transcoding.on('error', (err, stdout, stderr) => {
-        VideoTask.update({ status: -2 }, { where: { id: jobData.taskId } })
+        VideoTask.update({ status: -1 }, { where: { id: jobData.taskId } })
         done(new Error(`err:[${err}] \n  stdout:[${stdout}] \n stderr:[${stderr}]`))
     })
     transcoding.run()
