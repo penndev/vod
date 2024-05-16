@@ -16,6 +16,7 @@ export const captcha = async (ctx: Router.RouterContext) => {
     const uuid = 'captcha-' + randomUUID()
     const imgdata = Captcha.create({
         charPreset: '1234567890',
+        noise: 8,
         size: 4
     })
     Redis.set(uuid, imgdata.text, { EX: 60 })

@@ -63,15 +63,17 @@ export const isMkdir = async (filepath: string) => {
 /**
  * 安全删除文件
  * @param filepath
- * @returns
+ * @returns true 执行了删除操作。false 文件不存在
  */
 export const isUnlink = (filepath: string) => {
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
         try {
             if (existsSync(filepath)) {
                 unlinkSync(filepath)
+                resolve(true)
+            } else{
+                resolve(false)
             }
-            resolve(true)
         } catch (error) {
             reject(error)
         }
@@ -111,7 +113,7 @@ export const randomStr = (length: number) => {
  * @returns promise
  */
 export const sleep = (ms: number) => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
         setTimeout(resolve, ms)
     })
 }
