@@ -71,7 +71,7 @@ export const isUnlink = (filepath: string) => {
             if (existsSync(filepath)) {
                 unlinkSync(filepath)
                 resolve(true)
-            } else{
+            } else {
                 resolve(false)
             }
         } catch (error) {

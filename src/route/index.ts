@@ -6,6 +6,16 @@ import { ArchiveCategoryController, ArchiveListController, ArchiveTagController 
 
 const router = new Router()
 
+const routes = (ctx: Router.RouterContext) => {
+    const data = []
+    for (const item of router.stack) {
+        for (const method of item.methods) {
+            if (method === 'HEAD') { continue } data.push({ method, path: item.path })
+        }
+    }
+    ctx.body = { data }
+}
+
 /**
  * 允许post参数与文件上传
  */
@@ -35,6 +45,7 @@ router.get('/dashboard', vodDashBoard)
     router.put('/system/role', RoleController.Update)
     router.post('/system/role', RoleController.Create)
     router.delete('/system/role', RoleController.Delete)
+    router.get('/system/role/route', routes)
 }
 
 /**
