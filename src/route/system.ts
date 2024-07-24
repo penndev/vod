@@ -64,7 +64,7 @@ export const login = async (ctx: Router.RouterContext) => {
         ctx.body = { message: '密码错误' }
         return
     }
-    let routes = '*'
+    let routes: string|string[] = '*'
     if (adminInfo.adminRoleId > 0) {
         const role = await AdminRole.findByPk(adminInfo.adminRoleId)
         if (role === null) {

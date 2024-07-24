@@ -54,7 +54,7 @@ class AdminRole extends Model {
     declare updatedAt: Date
     declare name: string
     declare status: number
-    declare menu: {method:string, path:string}[]
+    declare menu: string[]
     declare route: {method:string, path:string}[] // [{path:'admin/list'},]
     public static initial (options: InitOptions) {
         this.init(
