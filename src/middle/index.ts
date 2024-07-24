@@ -74,7 +74,7 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     }
 
     // 判断是否需要进行接口鉴权
-    if (adminInfo.adminRoleId !== 0) {
+    if (adminInfo.adminRoleId > 0) {
         const roleInfo = await AdminRole.findByPk(adminInfo.adminRoleId)
         if (roleInfo == null) {
             ctx.status = 403
@@ -82,10 +82,10 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
             return
         }
         let denyIs = true
-        const allowArr = JSON.parse(roleInfo.route)
-        if (allowArr) {
-            for (const allowItem of allowArr) {
-                if (allowItem.path === '*' || allowItem.path === ctx.request.path) {
+        const routes = roleInfo.route
+        if (routes) {
+            for (const route of routes) {
+                if (route.method === ctx.request.method && route.path === ctx.request.path) {
                     denyIs = false
                     break
                 }

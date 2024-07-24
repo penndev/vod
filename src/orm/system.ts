@@ -54,8 +54,8 @@ class AdminRole extends Model {
     declare updatedAt: Date
     declare name: string
     declare status: number
-    declare menu: string
-    declare route: string // [{path:'admin/list'},]
+    declare menu: {method:string, path:string}[]
+    declare route: {method:string, path:string}[] // [{path:'admin/list'},]
     public static initial (options: InitOptions) {
         this.init(
             {
@@ -69,11 +69,11 @@ class AdminRole extends Model {
                     comment: '0禁止登录 | 1允许登录'
                 },
                 menu: {
-                    type: DataTypes.STRING,
+                    type: DataTypes.JSON,
                     comment: '返回给前端展示的路由组 json[]'
                 },
                 route: {
-                    type: DataTypes.STRING,
+                    type: DataTypes.JSON,
                     comment: '接口用户鉴权允许的路由组 json[]'
                 }
             },

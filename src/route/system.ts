@@ -257,9 +257,6 @@ export class RoleController {
             limit,
             where: whereArr
         })
-        for (const i of rows) {
-            i.route = JSON.parse(i.route)
-        }
         ctx.body = {
             data: rows,
             total: count
@@ -280,7 +277,7 @@ export class RoleController {
         roleInfo.name = name
         roleInfo.status = status
         roleInfo.menu = menu
-        roleInfo.route = JSON.stringify(route)
+        roleInfo.route = route
         await roleInfo.save()
         ctx.body = { message: '操作完成' }
     }
@@ -298,12 +295,11 @@ export class RoleController {
             ctx.body = { message: '角色已存在！' }
             return
         }
-        const routeJson = JSON.stringify(route)
         await AdminRole.create({
             name,
             status,
             menu,
-            route: routeJson
+            route
         })
         ctx.body = { message: '创建成功！' }
     }
