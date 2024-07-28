@@ -8,6 +8,8 @@ import config from '../config/index.js'
 import Bcrypt from 'bcrypt'
 import { Order, WhereOptions, Op } from 'sequelize'
 
+export const DefaultCost = 10
+
 /**
  * 获取系统验证码
  * @param ctx
@@ -45,7 +47,7 @@ export const login = async (ctx: Router.RouterContext) => {
     if (adminInfo === null) {
         const c = await AdminUser.count()
         if (c < 1) {
-            const saltRound = await Bcrypt.genSalt(10)
+            const saltRound = await Bcrypt.genSalt(DefaultCost)
             adminInfo = await AdminUser.create({
                 email: username,
                 passwd: await Bcrypt.hash(password, saltRound),
@@ -86,6 +88,27 @@ export const login = async (ctx: Router.RouterContext) => {
             ),
         routes
     }
+}
+
+/**
+ * 修改管理员密码
+ * @param ctx
+ */
+export const changePasswd = async (ctx: Router.RouterContext) => {
+    const { passwd, newPasswd } = ctx.request.body
+    const adminInfo = ctx.state as AdminUser
+
+    if (!await Bcrypt.compare(passwd, adminInfo.passwd)) {
+        ctx.status = 400
+        ctx.body = { message: '密码错误' }
+        return
+    }
+
+    const saltRound = await Bcrypt.genSalt(DefaultCost)
+    adminInfo.passwd = await Bcrypt.hash(newPasswd, saltRound)
+    await adminInfo.save()
+
+    ctx.body = { message: '修改成功' }
 }
 
 /**

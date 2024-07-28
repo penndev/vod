@@ -1,20 +1,10 @@
 import Router from '@koa/router'
 import { auth, body } from '../middle/index.js'
-import { AdminController, captcha, login, RoleController } from './system.js'
-import { VideoFileController, UploadMedia, VideoTranscodeConroller, VideoTaskController, vodDashBoard } from './video.js'
+import { AdminController, captcha, login, changePasswd, RoleController } from './system.js'
+import { VideoFileController, UploadMedia, VideoTranscodeController, VideoTaskController, vodDashBoard } from './video.js'
 import { ArchiveCategoryController, ArchiveListController, ArchiveTagController } from './archive.js'
 
 const router = new Router()
-
-const routes = (ctx: Router.RouterContext) => {
-    const data = []
-    for (const item of router.stack) {
-        for (const method of item.methods) {
-            if (method === 'HEAD') { continue } data.push({ method, path: item.path })
-        }
-    }
-    ctx.body = { data }
-}
 
 /**
  * 允许post参数与文件上传
@@ -28,7 +18,8 @@ router.post('/login', login) // 管理员登录
  */
 router.use(auth)
 
-router.get('/dashboard', vodDashBoard)
+router.get('/dashboard', vodDashBoard) // 数据面板
+router.put('/change-passwd', changePasswd) // 修改用户密码
 
 /**
  * 系统类接口
@@ -39,13 +30,23 @@ router.get('/dashboard', vodDashBoard)
     router.put('/system/admin', AdminController.Update)
     router.post('/system/admin', AdminController.Create)
     router.delete('/system/admin', AdminController.Delete)
-    router.get('/system/admin/accesslog', AdminController.AccessLog)
+    router.get('/system/admin/access-log', AdminController.AccessLog)
     // 系统角色处理
     router.get('/system/role', RoleController.List)
     router.put('/system/role', RoleController.Update)
     router.post('/system/role', RoleController.Create)
     router.delete('/system/role', RoleController.Delete)
-    router.get('/system/role/route', routes)
+    // 返回所有的后台请求路由。
+    router.get('/system/role/route', (ctx: Router.RouterContext) => {
+        const data = []
+        for (const item of router.stack) {
+            for (const method of item.methods) {
+                if (method === 'HEAD') continue
+                data.push({ method, path: item.path })
+            }
+        }
+        ctx.body = { data }
+    })
 }
 
 /**
@@ -60,10 +61,10 @@ router.get('/dashboard', vodDashBoard)
     router.delete('/video/file', VideoFileController.Delete)
 
     // 转码参数配置
-    router.post('/video/transcode', VideoTranscodeConroller.Add)
-    router.get('/video/transcode', VideoTranscodeConroller.List)
-    router.put('/video/transcode', VideoTranscodeConroller.Update)
-    router.delete('/video/transcode', VideoTranscodeConroller.Delete)
+    router.post('/video/transcode', VideoTranscodeController.Add)
+    router.get('/video/transcode', VideoTranscodeController.List)
+    router.put('/video/transcode', VideoTranscodeController.Update)
+    router.delete('/video/transcode', VideoTranscodeController.Delete)
 
     // 任务管理配置
     router.post('/video/task', VideoTaskController.Add)

@@ -239,7 +239,7 @@ export class VideoFileController {
 /**
  * 转码参数管理
  */
-export class VideoTranscodeConroller {
+export class VideoTranscodeController {
     /**
      * 新增转码配置
      */
