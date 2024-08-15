@@ -1,22 +1,22 @@
 import Router from '@koa/router'
-import redis from '../redis/index.js'
-import { WhereOptions, Op, Order } from 'sequelize'
+import Redis from '../config/redis.js'
+import transcodeChannel from '../queue/transcode.js'
 
+import { WhereOptions, Op, Order } from 'sequelize'
 import { VideoFile, VideoTranscode, VideoTask } from '../orm/index.js'
 import { File } from 'formidable'
 import { readFileSync, unlinkSync, writeFileSync } from 'fs'
-import { transcodeTask } from '../task/index.js'
 import { isMkdir, isUnlink, md5LargeFile, parseNumber } from '../util/index.js'
 import { dirname, join } from 'path/posix'
 import { ffprobeDataJson } from '../util/vod.js'
 
 /** 上传媒体文件 */
 interface uploadPart {
-    fid: number // 存储文件ID
-    fpath: string // 存储文件路径
-    fsize: number // 文件总大小
-    urate: number // 单分片大小,上传速率
-    ucount: number // 已经上传了多少次
+    id: number // 存储文件ID
+    path: string // 存储文件路径
+    size: number // 文件总大小
+    partSize: number // 单分片大小,上传速率
+    partCount: number // 已经上传了多少次
 }
 
 /**
@@ -35,7 +35,7 @@ export class UploadMedia {
         }
 
         const cacheKey = `upload:${md5}`
-        const cacheData = await redis.GET(cacheKey)
+        const cacheData = await Redis.get(cacheKey)
         if (cacheData) {
             ctx.body = JSON.parse(cacheData) as uploadPart
             return
@@ -48,25 +48,25 @@ export class UploadMedia {
             return
         }
 
-        const data = await VideoFile.create({
+        const vf = await VideoFile.create({
             fileName: name,
             fileMd5: md5,
             fileSize: size,
             status: 0
         })
-        await data.update({
-            filePath: `data/video/${data.fileMd5.slice(0, 3)}/${data.fileMd5}/${data.fileName}`
+        await vf.update({
+            filePath: `data/video/${vf.fileMd5.slice(0, 3)}/${vf.fileMd5}/${vf.fileName}`
         })
         // 清理掉历史遗留文件
-        await isUnlink(data.filePath)
+        await isUnlink(vf.filePath)
         const partData: uploadPart = {
-            fid: data.id,
-            fpath: data.filePath,
-            fsize: data.fileSize,
-            urate: 5 * 1048576,
-            ucount: 0
+            id: vf.id,
+            path: vf.filePath,
+            size: vf.fileSize,
+            partSize: 5 * 1048576,
+            partCount: 0
         }
-        await redis.SET(cacheKey, JSON.stringify(partData), { EX: 86400 })
+        await Redis.set(cacheKey, JSON.stringify(partData), { EX: 86400 })
         ctx.body = partData
     }
 
@@ -83,43 +83,45 @@ export class UploadMedia {
         }
 
         const cacheKey = `upload:${uploadID}`
-        const cacheData = await redis.GET(cacheKey)
+        const cacheData = await Redis.get(cacheKey)
         if (!cacheData) {
             ctx.status = 400
             ctx.body = { message: 'redisgetfile失败' }
             return
         }
         const partData:uploadPart = JSON.parse(cacheData)
-        if (partData.ucount !== parseInt(currentPart)) {
+        if (partData.partCount !== parseInt(currentPart)) {
             ctx.status = 400
             ctx.body = { message: 'currentPart失败' }
             return
         }
         const uploadFilePath = (uploadData as File).filepath
         const reader = readFileSync(uploadFilePath)
-        await isMkdir(partData.fpath)
-        writeFileSync(partData.fpath, reader, { flag: 'a+' })
+        if (partData.partCount === 0) await isMkdir(partData.path)
+        writeFileSync(partData.path, reader, { flag: 'a+' })
         unlinkSync(uploadFilePath) // 删除临时文件，某些系统不会自己删除。
-        partData.ucount = parseInt(currentPart) + 1
-        await redis.SET(cacheKey, JSON.stringify(partData), { EX: 86400 })
+        partData.partCount = parseInt(currentPart) + 1
+        await Redis.set(cacheKey, JSON.stringify(partData), { EX: 86400 })
 
         // 判断是否是最后一次上传.
-        const totalPart = Math.ceil(partData.fsize / partData.urate)
-        if (partData.ucount === totalPart) { // 查验文件信息
-            const vf = await VideoFile.findByPk(partData.fid)
+        const totalPart = Math.ceil(partData.size / partData.partSize)
+        if (partData.partCount === totalPart) { // 查验文件信息
+            const vf = await VideoFile.findByPk(partData.id)
             if (vf == null) {
                 ctx.status = 400
-                ctx.body = { message: '原文件id找不到！' }
+                ctx.body = { message: '原文件id找不到!' }
                 return
             }
             // 超过10G的文件可能会造成请求超时。
+            // 可以使用队列进行后续的操作，根据实际情况来操作。
+            // 必须保证发送任务和接收任务是同一节点。
             const md5 = await md5LargeFile(vf.filePath)
             if (vf.fileMd5 !== md5) {
                 vf.status = -1
                 await vf.save()
-                await redis.DEL(cacheKey)
+                await Redis.del(cacheKey)
                 ctx.status = 400
-                ctx.body = { message: 'md5 验证失败！' }
+                ctx.body = { message: 'md5 验证失败!' }
                 return
             }
 
@@ -144,7 +146,8 @@ export class UploadMedia {
             } catch (error) {
                 vf.status = -2
                 await vf.save()
-                throw Error('视频信息识别失败')
+                console.error(error)
+                throw error
             }
         }
         ctx.body = {
@@ -230,7 +233,7 @@ export class VideoFileController {
         }
 
         const cacheKey = `upload:${mediaInfo.fileMd5}`
-        await redis.DEL(cacheKey)
+        await Redis.del(cacheKey)
         await mediaInfo.destroy()
         ctx.body = { message: mediaInfo.fileName + '删除成功' }
     }
@@ -389,7 +392,7 @@ export class VideoTaskController {
     static async Add (ctx:Router.RouterContext) {
         const { fileId, transcodeId, command } = ctx.request.body
         const file = await VideoFile.findByPk(fileId)
-        if (!file || file.status < 1) {
+        if (file == null || file.status < 1) {
             ctx.status = 400
             ctx.body = { message: '文件不存在,或状态错误' }
             return
@@ -431,20 +434,14 @@ export class VideoTaskController {
         })
         task.outFile = join(dirname(file.filePath), `${task.id}/index.${transcode.format}`)
         await task.save()
-        await isMkdir(task.outFile)
-        const jobInfo = await transcodeTask.add(
-            {
-                inputFile: file?.filePath,
-                options,
-                outPutFile: task.outFile,
-                taskId: task.id
-            },
-            { attempts: 0 }
-        )
-        redis.set(`task:progress:${task.id}`, jobInfo.id, { EX: 86400 })
+        if (!transcodeChannel.send(task.id)) {
+            ctx.status = 400
+            ctx.body = { message: '提交队列失败' }
+            return
+        }
+        await transcodeChannel.log(task.id, `${Date} - 添加任务到queue`)
         ctx.body = {
-            message: '提交完成',
-            data: jobInfo
+            message: '提交完成'
         }
     }
 
@@ -495,16 +492,8 @@ export class VideoTaskController {
             ctx.body = { message: '任务不存在' }
             return
         }
-
-        const jobId = await redis.get(`task:progress:${task.id}`)
-        if (jobId == null) {
-            ctx.status = 400
-            ctx.body = { message: '任务过期' }
-            return
-        }
-        const job = await transcodeTask.getJob(jobId)
-        // 判断job
-        ctx.body = job
+        const progress = await Redis.get(`transcode:progress:${ctx.query.id}`)
+        ctx.body = { progress }
     }
 }
 

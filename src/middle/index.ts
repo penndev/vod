@@ -1,13 +1,12 @@
 import Router from '@koa/router'
 import Jwt from 'jsonwebtoken'
-import config from '../config/index.js'
 import mime from 'mime'
 import { Next } from 'koa'
 import { koaBody } from 'koa-body'
-import { AdminAccessLog, AdminUser, AdminRole } from '../orm/index.js'
-import { serverAdapter } from '../task/index.js'
 import { createReadStream, existsSync, statSync } from 'fs'
+import { AdminAccessLog, AdminUser, AdminRole } from '../orm/index.js'
 import { parseNumber } from '../util/index.js'
+import config from '../config/index.js'
 
 export const cors = async (ctx: Router.RouterContext, next: Next) => {
     if (ctx.method === 'OPTIONS') {
@@ -120,11 +119,6 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
 
 /** koa post 拓展 */
 export const body = koaBody({ multipart: true })
-
-/** bull koa adapter面板 */
-export const bull = (path:string) => {
-    return serverAdapter.setBasePath(path).registerPlugin()
-}
 
 export const mount = (u:string, d:string) => {
     return async (ctx: Router.RouterContext, next: Next) => {

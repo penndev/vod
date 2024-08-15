@@ -1,6 +1,6 @@
 import Router from '@koa/router'
 import Captcha from 'svg-captcha'
-import Redis from '../redis/index.js'
+import Redis from '../config/redis.js'
 import { randomUUID } from 'crypto'
 import { AdminUser, AdminAccessLog, AdminRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
@@ -15,16 +15,17 @@ export const DefaultCost = 10
  * @param ctx
  */
 export const captcha = async (ctx: Router.RouterContext) => {
-    const uuid = 'captcha-' + randomUUID()
-    const imgdata = Captcha.create({
+    const cacheKey = 'captcha:' + randomUUID()
+    const imgData = Captcha.create({
         charPreset: '1234567890',
         noise: 8,
         size: 4
     })
-    Redis.set(uuid, imgdata.text, { EX: 60 })
+
+    await Redis.set(cacheKey, imgData.text, { EX: 120 })
     ctx.body = {
-        captchaURL: `data:image/svg+xml;base64,${Buffer.from(imgdata.data, 'binary').toString('base64')}`,
-        captchaID: uuid
+        captchaURL: `data:image/svg+xml;base64,${Buffer.from(imgData.data, 'binary').toString('base64')}`,
+        captchaID: cacheKey
     }
 }
 

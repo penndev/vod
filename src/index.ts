@@ -1,10 +1,9 @@
 import Koa from 'koa'
-
-import { cors, log, bull, mount } from './middle/index.js'
+import { cors, log, mount } from './middle/index.js'
 import { adminRoute } from './route/index.js'
-import config from './config/index.js'
 import { networks } from './util/index.js'
 import { AddressInfo } from 'net'
+import config from './config/index.js'
 
 const app = new Koa()
 
@@ -20,18 +19,10 @@ app.use(adminRoute('/api'))
 // 挂载静态入口
 app.use(mount('/data', './data'))
 
-/**
- * bull-board http://{host}/bull
- * 开启访问bull队列的仪表盘
- * 正式环境需要进行权限验证请自行定义
- */
-if (config.mode === 'dev') {
-    app.use(bull('/bull'))
-}
-
 app.on('error', (err) => {
     if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
-    // tcp客户端关闭 koa不对tcp层做处理
+    // tcp客户端非正常关闭
+    // koa不对tcp层做处理
     } else {
         console.error(err)
     }

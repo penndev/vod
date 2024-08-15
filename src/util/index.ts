@@ -12,18 +12,16 @@ import os from 'node:os'
  */
 export const getFolderSize = (folderPath:string) :number => {
     let totalSize = 0
-    try {
-        const files = readdirSync(folderPath)
-        files.forEach(file => {
-            const filePath = path.join(folderPath, file)
-            const stats = statSync(filePath)
-            if (stats.isFile()) {
-                totalSize += stats.size
-            }
-        })
-    } catch (error) {
-        totalSize = 1
-    }
+
+    const files = readdirSync(folderPath)
+    files.forEach(file => {
+        const filePath = path.join(folderPath, file)
+        const stats = statSync(filePath)
+        if (stats.isFile()) {
+            totalSize += stats.size
+        }
+    })
+
     return totalSize
 }
 

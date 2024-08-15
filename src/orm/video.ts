@@ -185,6 +185,9 @@ class VideoTask extends Model {
     declare videoTranscodeId: number
 
     declare options: string
+    /**
+     * -1转码失败|0队列中|1转码中|2完成
+     */
     declare status: number
 
     declare outFile: string

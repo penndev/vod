@@ -127,6 +127,7 @@ export class ArchiveListController {
      */
     static async Update (ctx: Router.RouterContext) {
         let {
+            // eslint-disable-next-line
             id, archiveCategoryId, status, pic, name, sub, total, year, lang, area, content
         } = ctx.request.body
         const ALinfo = await ArchiveList.findByPk(id)
