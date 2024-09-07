@@ -3,24 +3,22 @@ A Vod Codec Admin CMS
 
 > 一个简单的视频编码（转码）管理系统
 
-
 ## 配置
 
 配置文件
 
 - `.env`
-- `src/config/index.ts` | **参数校验**
-
+- `src/config/index.ts` | 参数校验
 
 ## 启动
 
+**开发启动**
 - `npm run dev`
 
-- `npm run serve`
-
-
 ## 文件管理
-> 媒体文件管理包含上传、编辑、预览、删除、等操作。包含以下核心功能：
+> 媒体文件管理包含上传、编辑、预览、删除、等操作。
+
+包含以下核心功能：
 - 上传功能
   - 文件秒传
   - 切片上传
@@ -28,7 +26,8 @@ A Vod Codec Admin CMS
   - 文件校验
 - 媒体分析
   - 文件大小
-  - ffprobe文件分析
+  - 视频分辨率
+  - 视频FPS
 - 预览功能
   - videojs 在线播放器预览
   - Range 实现http range功能，范围预览视频
@@ -37,7 +36,11 @@ A Vod Codec Admin CMS
   - 局域网IP获取文件
 
 ## 视频转码
-> 用nodejs封装ffmpeg命令，依赖`ffmpeg`实现视频编码转换，`ffprobe` 来进行视频信息识别。`ffmpeg`和`ffprobe`需要自行安装并配置在 **环境变量** 中（可以直接在命令行使用ffmpeg ffprobe命令）。
+> 用nodejs封装ffmpeg命令，依赖`ffmpeg`实现视频编码转换，`ffprobe` 来进行视频信息识别。`ffmpeg`和`ffprobe`需要自行安装并配置在 **环境变量** 中（可以直接在命令行使用ffmpeg ffprobe命令）
+
+基于rabbitmq进行异步队列处理
+
+
 
 ## 依赖
 - [veadmin](https://github.com/penndev/veadmin)

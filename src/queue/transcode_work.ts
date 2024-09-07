@@ -54,12 +54,16 @@ const callBackMessage = async (vtID: number) : Promise<boolean> => {
     })
 }
 
+const prefetch = 1
+
 /**
  * 处理线程
  */
-transcodeChannel.prefetch(1)
+transcodeChannel.prefetch(prefetch)
 
 /**
  * 插载执行函数
  */
 transcodeChannel.recv(callBackMessage)
+
+console.log(`transcodeChannel Worker starting prefetch ${prefetch}`)

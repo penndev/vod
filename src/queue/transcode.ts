@@ -2,6 +2,7 @@ import amqp from 'amqplib'
 import conn from '../config/amqp.js'
 import Redis from '../config/redis.js'
 import { parseNumber } from '../util/index.js'
+import config from '../config/index.js'
 
 interface TranscodeChannel extends amqp.Channel {
     /**
@@ -38,6 +39,9 @@ await transcodeChannel.assertQueue('transcode', { durable: true })
  */
 {
     transcodeChannel.send = (vtID: number, options?: amqp.Options.Publish) => {
+        if (options === undefined) { //需要配置持久化
+            options = {persistent: true}
+        }
         return transcodeChannel.sendToQueue('transcode', Buffer.from(`${vtID}`), options)
     }
     transcodeChannel.recv = (onMessage, options) => {
@@ -62,5 +66,9 @@ await transcodeChannel.assertQueue('transcode', { durable: true })
     }
 }
 // -
+
+if(config.mode == 'dev') {
+    import('./transcode_work.js')
+}
 
 export default transcodeChannel
