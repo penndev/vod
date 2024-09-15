@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import config from '../config/index.js'
 import { VideoFile, VideoTranscode, VideoTask } from './video.js'
 import { ArchiveCategory, ArchiveList, ArchiveTag, ArchiveTagMap } from './archive.js'
-import { AdminAccessLog, AdminUser, AdminRole } from './system.js'
+import { SysAccessLog, SysAdmin, SysRole } from './system.js'
 /**
  * 数据库连接实例
  * 并对连通性进行测试
@@ -29,16 +29,16 @@ const initOptions = {
 
 /**
  * 系统管理默认表
- * @param AdminUser 系统管理员
- * @param AdminRole 系统权限
- * @param AdminAccessLog 系统访问日志表
+ * @param SysAdmin 系统管理员
+ * @param SysRole 系统权限
+ * @param SysAccessLog 系统访问日志表
  */
-AdminUser.initial(initOptions)
-AdminRole.initial(initOptions)
-AdminAccessLog.initial(initOptions)
+SysAdmin.initial(initOptions)
+SysRole.initial(initOptions)
+SysAccessLog.initial(initOptions)
 // *** 处理关联联系
-AdminUser.belongsTo(AdminRole, { constraints: false })
-AdminAccessLog.belongsTo(AdminUser, { constraints: false })
+SysAdmin.belongsTo(SysRole, { constraints: false })
+SysAccessLog.belongsTo(SysAdmin, { constraints: false })
 
 /**
  * 视频管理默认表
@@ -78,9 +78,9 @@ if (config.mode === 'dev') {
 export {
     sequelize,
 
-    AdminUser,
-    AdminRole,
-    AdminAccessLog,
+    SysAdmin,
+    SysRole,
+    SysAccessLog,
     // - 分组
     VideoFile,
     VideoTranscode,

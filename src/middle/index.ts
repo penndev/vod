@@ -4,7 +4,7 @@ import mime from 'mime'
 import { Next } from 'koa'
 import { koaBody } from 'koa-body'
 import { createReadStream, existsSync, statSync } from 'fs'
-import { AdminAccessLog, AdminUser, AdminRole } from '../orm/index.js'
+import { SysAccessLog, SysAdmin, SysRole } from '../orm/index.js'
 import { parseNumber } from '../util/index.js'
 import config from '../config/index.js'
 
@@ -50,11 +50,11 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         ctx.body = { message: '请进行用户验证' }
         return
     }
-    let adminInfo:AdminUser|null = null
+    let adminInfo:SysAdmin|null = null
     // 进行用户认证以及登录权限
     try {
         const payload = Jwt.verify(token, config.secret)
-        adminInfo = await AdminUser.findByPk(Number(payload.sub))
+        adminInfo = await SysAdmin.findByPk(Number(payload.sub))
         if (adminInfo === null) {
             ctx.status = 401
             ctx.body = { message: '用户失效' }
@@ -73,11 +73,16 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
     }
 
     // 判断是否需要进行接口鉴权
-    if (adminInfo.adminRoleId > 0) {
-        const roleInfo = await AdminRole.findByPk(adminInfo.adminRoleId)
+    if (adminInfo.SysRoleId > 0) {
+        const roleInfo = await SysRole.findByPk(adminInfo.SysRoleId)
         if (roleInfo == null) {
             ctx.status = 403
-            ctx.body = { messge: '权限匹配失败' }
+            ctx.body = { message: '权限匹配失败' }
+            return
+        }
+        if (roleInfo.status != 1) {
+            ctx.status = 403
+            ctx.body = { message: '权限已被暂停' }
             return
         }
         let denyIs = true
@@ -97,24 +102,21 @@ export const auth = async (ctx: Router.RouterContext, next: Next) => {
         }
     }
     await next()
-    const param = {
-        query: ctx.request.query,
-        body: ctx.request.body
-    }
-
     /**
-   * 处理记录什么类型的日志，如果什么都记录会数据过大
-   */
-    if (ctx.request.method in ['POST', 'DELETE']) {
-        await AdminAccessLog.create({
-            adminUserId: adminInfo.id,
-            path: ctx.request.path,
-            method: ctx.request.method,
-            ip: ctx.request.ip,
-            payload: JSON.stringify(param, null, 2),
-            status: ctx.response.status
-        })
-    }
+     * 处理记录什么类型的日志，如果什么都记录会数据过大
+     * if (ctx.request.method in ['POST', 'DELETE']) {}
+     */
+    await SysAccessLog.create({
+        SysAdminId: adminInfo.id,
+        path: ctx.request.path,
+        method: ctx.request.method,
+        ip: ctx.request.ip,
+        payload: JSON.stringify({
+            query: ctx.request.query,
+            body: ctx.request.body
+        }, null, 2),
+        status: ctx.response.status
+    })
 }
 
 /** koa post 拓展 */

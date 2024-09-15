@@ -68,7 +68,7 @@ await transcodeChannel.assertQueue('transcode', { durable: true })
 // -
 
 if(config.mode == 'dev') {
-    import('./transcode_work.js')
+    // import('./transcode_work.js')
 }
 
 export default transcodeChannel

@@ -2,7 +2,7 @@ import Router from '@koa/router'
 import Captcha from 'svg-captcha'
 import Redis from '../config/redis.js'
 import { randomUUID } from 'crypto'
-import { AdminUser, AdminAccessLog, AdminRole } from '../orm/index.js'
+import { SysAdmin, SysAccessLog, SysRole } from '../orm/index.js'
 import Jwt from 'jsonwebtoken'
 import config from '../config/index.js'
 import Bcrypt from 'bcrypt'
@@ -42,20 +42,22 @@ export const login = async (ctx: Router.RouterContext) => {
         ctx.body = { message: '验证码错误' }
         return
     }
-    let adminInfo = await AdminUser.findOne({
+    const adminInfo = await SysAdmin.findOne({
         where: { email: username }
     })
     if (adminInfo === null) {
-        const c = await AdminUser.count()
+        const c = await SysAdmin.count()
         if (c < 1) {
-            const saltRound = await Bcrypt.genSalt(DefaultCost)
-            adminInfo = await AdminUser.create({
+            await SysAdmin.create({
                 email: username,
-                passwd: await Bcrypt.hash(password, saltRound),
+                passwd: await Bcrypt.hash(password, await Bcrypt.genSalt(DefaultCost)),
                 status: 1,
-                adminRoleId: 0,
+                SysRoleId: 0,
                 nickname: 'admin'
             })
+            ctx.status = 400
+            ctx.body = { message: '已经初始化管理员，请登录' }
+            return
         } else {
             ctx.status = 400
             ctx.body = { message: '用户不存在' }
@@ -68,8 +70,8 @@ export const login = async (ctx: Router.RouterContext) => {
         return
     }
     let routes: string|string[] = '*'
-    if (adminInfo.adminRoleId > 0) {
-        const role = await AdminRole.findByPk(adminInfo.adminRoleId)
+    if (adminInfo.SysRoleId > 0) {
+        const role = await SysRole.findByPk(adminInfo.SysRoleId)
         if (role === null) {
             ctx.status = 400
             ctx.body = { message: '密码错误' }
@@ -77,7 +79,6 @@ export const login = async (ctx: Router.RouterContext) => {
         }
         routes = role.menu
     }
-
     ctx.body = {
         token:
             Jwt.sign(
@@ -97,7 +98,7 @@ export const login = async (ctx: Router.RouterContext) => {
  */
 export const changePasswd = async (ctx: Router.RouterContext) => {
     const { passwd, newPasswd } = ctx.request.body
-    const adminInfo = ctx.state as AdminUser
+    const adminInfo = ctx.state as SysAdmin
 
     if (!await Bcrypt.compare(passwd, adminInfo.passwd)) {
         ctx.status = 400
@@ -129,13 +130,13 @@ export class AdminController {
             whereArr.email = { [Op.like]: '%' + email + '%' }
         }
 
-        const { rows, count } = await AdminUser.findAndCountAll({
+        const { rows, count } = await SysAdmin.findAndCountAll({
             attributes: { exclude: ['passwd'] },
             offset: page * limit - limit,
             limit,
             where: whereArr,
             include: [
-                { model: AdminRole }
+                { model: SysRole }
             ]
         })
         ctx.body = {
@@ -149,7 +150,7 @@ export class AdminController {
      */
     static async Update (ctx: Router.RouterContext) {
         const { id, email, status, nickname, roleId } = ctx.request.body
-        const adminInfo = await AdminUser.findByPk(id)
+        const adminInfo = await SysAdmin.findByPk(id)
         if (adminInfo === null) {
             ctx.status = 400
             ctx.body = { message: '用户不存在！' }
@@ -173,8 +174,8 @@ export class AdminController {
      * 新增管理员
      */
     static async Create (ctx: Router.RouterContext) {
-        const { email, passwd, status, adminRoleId, nickname } = ctx.request.body
-        const adminInfo = await AdminUser.findOne({
+        const { email, passwd, status, SysRoleId, nickname } = ctx.request.body
+        const adminInfo = await SysAdmin.findOne({
             where: { email }
         })
         if (adminInfo !== null) {
@@ -182,19 +183,19 @@ export class AdminController {
             ctx.body = { message: '邮箱已存在！' }
             return
         }
-        if (adminRoleId < 1) {
+        if (SysRoleId < 1) {
             ctx.status = 400
             ctx.body = { message: '权限错误！' }
             return
         }
 
         const saltRound = await Bcrypt.genSalt(10)
-        await AdminUser.create({
+        await SysAdmin.create({
             email,
             passwd: await Bcrypt.hash((passwd || '123456'), saltRound),
             status,
-            nickname: nickname || '默认用户',
-            adminRoleId
+            nickname: nickname || email,
+            SysRoleId
         })
         ctx.body = { message: '创建成功！' }
     }
@@ -204,13 +205,13 @@ export class AdminController {
      */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
-        const adminInfo = await AdminUser.findByPk(Number(id))
+        const adminInfo = await SysAdmin.findByPk(Number(id))
         if (adminInfo === null) {
             ctx.status = 400
             ctx.body = { message: '管理员不存在' }
             return
         }
-        if (adminInfo.adminRoleId < 1) {
+        if (adminInfo.SysRoleId < 1) {
             ctx.status = 400
             ctx.body = { message: '无权操作' }
             return
@@ -249,8 +250,8 @@ export class AdminController {
             }
         }
 
-        const { rows, count } = await AdminAccessLog.findAndCountAll({
-            offset, limit, where, order, include: [{ model: AdminUser }]
+        const { rows, count } = await SysAccessLog.findAndCountAll({
+            offset, limit, where, order, include: [{ model: SysAdmin }]
         })
         ctx.body = {
             data: rows,
@@ -276,7 +277,7 @@ export class RoleController {
             whereArr.name = { [Op.like]: '%' + name + '%' }
         }
 
-        const { rows, count } = await AdminRole.findAndCountAll({
+        const { rows, count } = await SysRole.findAndCountAll({
             offset: page * limit - limit,
             limit,
             where: whereArr
@@ -292,7 +293,7 @@ export class RoleController {
      */
     static async Update (ctx: Router.RouterContext) {
         const { id, name, status, menu, route } = ctx.request.body
-        const roleInfo = await AdminRole.findByPk(id)
+        const roleInfo = await SysRole.findByPk(id)
         if (roleInfo === null) {
             ctx.status = 400
             ctx.body = { message: '用户不存在！' }
@@ -311,7 +312,7 @@ export class RoleController {
      */
     static async Create (ctx: Router.RouterContext) {
         const { name, status, menu, route } = ctx.request.body
-        const roleInfo = await AdminRole.findOne({
+        const roleInfo = await SysRole.findOne({
             where: { name }
         })
         if (roleInfo !== null) {
@@ -319,7 +320,7 @@ export class RoleController {
             ctx.body = { message: '角色已存在！' }
             return
         }
-        await AdminRole.create({
+        await SysRole.create({
             name,
             status,
             menu,
@@ -333,7 +334,7 @@ export class RoleController {
      */
     static async Delete (ctx: Router.RouterContext) {
         const id = ctx.request.query.id
-        const roleInfo = await AdminRole.findByPk(Number(id))
+        const roleInfo = await SysRole.findByPk(Number(id))
         if (roleInfo === null) {
             ctx.status = 400
             ctx.body = { message: '管理员不存在' }

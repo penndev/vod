@@ -6,6 +6,7 @@
   "exports": "./dist/index.js",
   "scripts": {
     "serve": "tsx src/index.ts",
+    "queue": "tsx src/queue/index.ts",
     "lint": "eslint ./src --fix",
     "dev": "npm run lint && tsx watch src/index.ts",
     "test": "tsx test/index.ts"

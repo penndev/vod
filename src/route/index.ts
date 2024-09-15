@@ -10,6 +10,10 @@ const router = new Router()
  * 允许post参数与文件上传
  */
 router.use(body)
+
+/**
+ * 未登录就开放的接口
+ */
 router.get('/captcha', captcha) // 全局验证码
 router.post('/login', login) // 管理员登录
 

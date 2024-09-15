@@ -14,15 +14,14 @@ app.use(cors)
 app.use(log)
 
 // 请求路由主入口
-app.use(adminRoute('/api'))
+app.use(adminRoute('/admin'))
 
 // 挂载静态入口
 app.use(mount('/data', './data'))
 
 app.on('error', (err) => {
     if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
-    // tcp客户端非正常关闭
-    // koa不对tcp层做处理
+        // tcp客户端非正常关闭 koa不对tcp层做处理
     } else {
         console.error(err)
     }

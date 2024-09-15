@@ -3,7 +3,7 @@ import { DataTypes, Model, InitOptions } from 'sequelize'
 /**
  * 管理员列表
  */
-class AdminUser extends Model {
+class SysAdmin extends Model {
     declare id: number
     declare createdAt: Date
     declare updatedAt: Date
@@ -11,12 +11,13 @@ class AdminUser extends Model {
     declare email: string
     declare passwd: string
     declare status: number
+    declare remark: string
 
-    declare adminRoleId: number
+    declare SysRoleId: number
 
     // 结构体
     static initial (options: InitOptions) {
-        AdminUser.init(
+        SysAdmin.init(
             {
                 email: {
                     type: DataTypes.STRING,
@@ -35,11 +36,15 @@ class AdminUser extends Model {
                     defaultValue: 0,
                     comment: '0禁止登录 | 1允许登录'
                 },
-                adminRoleId: {
+                SysRoleId: {
                     type: DataTypes.INTEGER.UNSIGNED,
                     allowNull: false,
                     comment: '0超级管理员'
-                }
+                },
+                remark: {
+                    type: DataTypes.STRING,
+                    allowNull: true
+                },
             }, options
         )
     }
@@ -48,7 +53,7 @@ class AdminUser extends Model {
 /**
  * 角色列表
  */
-class AdminRole extends Model {
+class SysRole extends Model {
     declare id: number
     declare createdAt: Date
     declare updatedAt: Date
@@ -75,7 +80,11 @@ class AdminRole extends Model {
                 route: {
                     type: DataTypes.JSON,
                     comment: '接口用户鉴权允许的路由组 json[]'
-                }
+                },
+                remark: {
+                    type: DataTypes.STRING,
+                    allowNull: true
+                },
             },
             options
         )
@@ -85,12 +94,12 @@ class AdminRole extends Model {
 /**
  * 权限访问日志
  */
-class AdminAccessLog extends Model {
+class SysAccessLog extends Model {
     declare id: number
     declare createdAt: Date
     declare updatedAt: Date
 
-    declare adminUserId: number // request auth user
+    declare SysAdminId: number // request auth user
     declare method: string // http request method
     declare path: string // http request url
     declare payload: string // requets param or body
@@ -99,7 +108,7 @@ class AdminAccessLog extends Model {
     public static initial (options: InitOptions) {
         this.init(
             {
-                adminUserId: {
+                SysAdminId: {
                     type: DataTypes.INTEGER.UNSIGNED
                 },
                 ip: {
@@ -129,7 +138,7 @@ class AdminAccessLog extends Model {
 }
 
 export {
-    AdminUser,
-    AdminRole,
-    AdminAccessLog
+    SysAdmin,
+    SysRole,
+    SysAccessLog
 }
